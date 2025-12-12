@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mirai AI - ダッシュボード</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.css">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .sidebar a:hover {
+            background: #34495e;
+        }
+        .main-content {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 sidebar">
+                <h4>Mirai AI</h4>
+                <hr>
+                <a href="/admin/dashboard">
+                    <i data-feather="home"></i> ダッシュボード
+                </a>
+                <a href="/admin/api-keys">
+                    <i data-feather="key"></i> APIキー管理
+                </a>
+                <a href="/chat">
+                    <i data-feather="message-circle"></i> チャット
+                </a>
+                <hr>
+                <a href="/auth/logout">
+                    <i data-feather="log-out"></i> ログアウト
+                </a>
+            </div>
+            <div class="col-md-10 main-content">
+                <h1>ダッシュボード</h1>
+                <p>ようこそ、{{ user.name }}さん</p>
+                <p>メールアドレス: {{ user.email }}</p>
+                {% if user.owner_id %}
+                <p>担当者: {{ user.firstname }} {{ user.lastname }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>
+

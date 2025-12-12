@@ -1,0 +1,225 @@
+{
+  "select_properties": [
+    {
+      "name": "acquisition_channel",
+      "label": "獲得チャネル",
+      "field_type": "select",
+      "type": "enumeration",
+      "options_count": 2,
+      "in_purchase": true,
+      "in_sales": false
+    },
+    {
+      "name": "appraisal_property",
+      "label": "査定物件",
+      "field_type": "booleancheckbox",
+      "type": "enumeration",
+      "options_count": 2,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "banking_facilities",
+      "label": "金融機関名",
+      "field_type": "checkbox",
+      "type": "enumeration",
+      "options_count": 11,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "banking_facilities_result",
+      "label": "金融機関結果",
+      "field_type": "radio",
+      "type": "enumeration",
+      "options_count": 2,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "deal_hold",
+      "label": "保留",
+      "field_type": "checkbox",
+      "type": "enumeration",
+      "options_count": 1,
+      "in_purchase": true,
+      "in_sales": false
+    },
+    {
+      "name": "deal_non_applicable",
+      "label": "非該当物件",
+      "field_type": "booleancheckbox",
+      "type": "enumeration",
+      "options_count": 2,
+      "in_purchase": true,
+      "in_sales": false
+    },
+    {
+      "name": "dealtype",
+      "label": "Deal Type",
+      "field_type": "radio",
+      "type": "enumeration",
+      "options_count": 2,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "exit_strategy",
+      "label": "出口戦略",
+      "field_type": "select",
+      "type": "enumeration",
+      "options_count": 2,
+      "in_purchase": true,
+      "in_sales": false
+    },
+    {
+      "name": "follow_up",
+      "label": "追客余地",
+      "field_type": "booleancheckbox",
+      "type": "enumeration",
+      "options_count": 2,
+      "in_purchase": true,
+      "in_sales": false
+    },
+    {
+      "name": "hs_analytics_latest_source",
+      "label": "Latest Traffic Source",
+      "field_type": "calculation_equation",
+      "type": "enumeration",
+      "options_count": 10,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "hs_analytics_latest_source_company",
+      "label": "Latest Traffic Source Company",
+      "field_type": "select",
+      "type": "enumeration",
+      "options_count": 10,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "hs_analytics_latest_source_contact",
+      "label": "Latest Traffic Source Contact",
+      "field_type": "select",
+      "type": "enumeration",
+      "options_count": 10,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "hs_analytics_source",
+      "label": "Original Traffic Source",
+      "field_type": "select",
+      "type": "enumeration",
+      "options_count": 10,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "hs_associated_deal_registration_deal_type",
+      "label": "Associated Shared Deal Type",
+      "field_type": "select",
+      "type": "enumeration",
+      "options_count": 5,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "hs_associated_deal_registration_product_interests",
+      "label": "Associated Shared Deal Product Interests",
+      "field_type": "checkbox",
+      "type": "enumeration",
+      "options_count": 62,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "hs_deal_amount_calculation_preference",
+      "label": "Deal amount calculation preference",
+      "field_type": "radio",
+      "type": "enumeration",
+      "options_count": 4,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "hs_manual_forecast_category",
+      "label": "Forecast category",
+      "field_type": "select",
+      "type": "enumeration",
+      "options_count": 5,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "hs_notes_next_activity_type",
+      "label": "Next Activity Type",
+      "field_type": "select",
+      "type": "enumeration",
+      "options_count": 13,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "hs_priority",
+      "label": "Priority",
+      "field_type": "select",
+      "type": "enumeration",
+      "options_count": 3,
+      "in_purchase": false,
+      "in_sales": false
+    },
+    {
+      "name": "possession",
+      "label": "中長期保有の可能性",
+      "field_type": "booleancheckbox",
+      "type": "enumeration",
+      "options_count": 2,
+      "in_purchase": true,
+      "in_sales": false
+    },
+    {
+      "name": "purchase_conditions",
+      "label": "買取条件",
+      "field_type": "checkbox",
+      "type": "enumeration",
+      "options_count": 4,
+      "in_purchase": false,
+      "in_sales": true
+    },
+    {
+      "name": "research_ng_reason",
+      "label": "NG理由",
+      "field_type": "checkbox",
+      "type": "enumeration",
+      "options_count": 5,
+      "in_purchase": true,
+      "in_sales": true
+    },
+    {
+      "name": "sales_ng_reason",
+      "label": "NG理由（販売）",
+      "field_type": "checkbox",
+      "type": "enumeration",
+      "options_count": 12,
+      "in_purchase": false,
+      "in_sales": true
+    }
+  ],
+  "in_purchase_table": [
+    "exit_strategy",
+    "follow_up",
+    "deal_hold",
+    "deal_non_applicable",
+    "acquisition_channel",
+    "research_ng_reason",
+    "possession"
+  ],
+  "in_sales_table": [
+    "sales_ng_reason",
+    "research_ng_reason",
+    "purchase_conditions"
+  ]
+}

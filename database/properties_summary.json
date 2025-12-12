@@ -1,0 +1,22 @@
+{
+  "companies": {
+    "count": 244,
+    "properties_file": "/Users/mizutanikenta/areaagent/mirai-arc/mirai-ai/database/companies_properties.json",
+    "sql_file": "/Users/mizutanikenta/areaagent/mirai-arc/mirai-ai/database/create_companies_table.sql"
+  },
+  "contacts": {
+    "count": 411,
+    "properties_file": "/Users/mizutanikenta/areaagent/mirai-arc/mirai-ai/database/contacts_properties.json",
+    "sql_file": "/Users/mizutanikenta/areaagent/mirai-arc/mirai-ai/database/create_contacts_table.sql"
+  },
+  "deals": {
+    "count": 384,
+    "properties_file": "/Users/mizutanikenta/areaagent/mirai-arc/mirai-ai/database/deals_properties.json",
+    "sql_file": "/Users/mizutanikenta/areaagent/mirai-arc/mirai-ai/database/create_deals_table.sql"
+  },
+  "2-39155607": {
+    "count": 68,
+    "properties_file": "/Users/mizutanikenta/areaagent/mirai-arc/mirai-ai/database/properties_properties.json",
+    "sql_file": "/Users/mizutanikenta/areaagent/mirai-arc/mirai-ai/database/create_properties_table.sql"
+  }
+}

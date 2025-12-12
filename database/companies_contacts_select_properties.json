@@ -1,0 +1,868 @@
+{
+  "companies": {
+    "total_select_properties": 27,
+    "in_table": [
+      "company_area",
+      "company_buy_or_sell",
+      "company_buy_phase",
+      "company_channel",
+      "company_follow_rank",
+      "company_gross2",
+      "company_industry",
+      "company_list_exclusion",
+      "company_property_type",
+      "company_sell_phase",
+      "company_state"
+    ],
+    "properties": [
+      {
+        "name": "company_area",
+        "label": "取扱エリア",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 14,
+        "options": [
+          "0: 東京23区内",
+          "1: 東京23区外",
+          "2: 神奈川",
+          "3: 千葉",
+          "4: 埼玉",
+          "5: その他（関東）",
+          "6: その他（北海道）",
+          "7: その他（東北）",
+          "8: その他（中部）",
+          "9: その他（関西）",
+          "10: その他（九州）",
+          "11: その他（四国）",
+          "12: その他（沖縄）",
+          "13: その他（海外）"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 東京23区内, 1: 東京23区外, 2: 神奈川, 3: 千葉, 4: 埼玉, 5: その他（関東）, 6: その他（北海道）, 7: その他（東北）, 8: その他（中部）, 9: その他（関西）, 10: その他（九州）, 11: その他（四国）, 12: その他（沖縄）, 13: その他（海外）"
+      },
+      {
+        "name": "company_buy_or_sell",
+        "label": "仕入 or 売却",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 2,
+        "options": [
+          "0: 仕入",
+          "1: 売却"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 仕入, 1: 売却"
+      },
+      {
+        "name": "company_buy_phase",
+        "label": "仕入フェーズ",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 4,
+        "options": [
+          "0: A：成約",
+          "1: B：該当物件もらえた",
+          "2: C：物件情報もらえた（該当物件ではない）",
+          "3: D：情報未取得"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: A：成約, 1: B：該当物件もらえた, 2: C：物件情報もらえた（該当物件ではない）, 3: D：情報未取得"
+      },
+      {
+        "name": "company_channel",
+        "label": "チャネル",
+        "field_type": "radio",
+        "type": "enumeration",
+        "options_count": 10,
+        "options": [
+          "0: RAINS",
+          "1: 健美家",
+          "2: 楽待",
+          "3: ハトマーク",
+          "4: ラビーネット",
+          "5: eight",
+          "6: 業者会",
+          "7: BIZMAP",
+          "8: リファラル",
+          "9: HP"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: RAINS, 1: 健美家, 2: 楽待, 3: ハトマーク, 4: ラビーネット, 5: eight, 6: 業者会, 7: BIZMAP, 8: リファラル, 9: HP"
+      },
+      {
+        "name": "company_follow_rank",
+        "label": "追客優先度",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 5,
+        "options": [
+          "0: S",
+          "1: A",
+          "2: B",
+          "3: C",
+          "4: D"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: S, 1: A, 2: B, 3: C, 4: D"
+      },
+      {
+        "name": "company_gross2",
+        "label": "グロス",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 6,
+        "options": [
+          "0: 〜1億",
+          "1: 1〜3億",
+          "2: 3億〜5億",
+          "3: 5億〜10億",
+          "4: 10億以上",
+          "5: その他"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 〜1億, 1: 1〜3億, 2: 3億〜5億, 3: 5億〜10億, 4: 10億以上, 5: その他"
+      },
+      {
+        "name": "company_industry",
+        "label": "業種",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 7,
+        "options": [
+          "0: 売買仲介（エンド）",
+          "1: 売買仲介（業者）",
+          "2: 買取",
+          "3: 買取（保有）",
+          "4: 賃貸仲介",
+          "5: 賃貸管理",
+          "6: その他"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 売買仲介（エンド）, 1: 売買仲介（業者）, 2: 買取, 3: 買取（保有）, 4: 賃貸仲介, 5: 賃貸管理, 6: その他"
+      },
+      {
+        "name": "company_list_exclusion",
+        "label": "リスト除外",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 1,
+        "options": [
+          "0: はい"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: はい"
+      },
+      {
+        "name": "company_property_type",
+        "label": "取扱種別",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 7,
+        "options": [
+          "0: 1棟AP",
+          "1: 1棟MS",
+          "2: 区分（投資）",
+          "3: ビル",
+          "4: 土地",
+          "5: 戸建て",
+          "6: その他"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 1棟AP, 1: 1棟MS, 2: 区分（投資）, 3: ビル, 4: 土地, 5: 戸建て, 6: その他"
+      },
+      {
+        "name": "company_sell_phase",
+        "label": "販売フェーズ",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 4,
+        "options": [
+          "0: A：成約",
+          "1: B：買付取得",
+          "2: C：資料請求",
+          "3: D：反応なし"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: A：成約, 1: B：買付取得, 2: C：資料請求, 3: D：反応なし"
+      },
+      {
+        "name": "company_state",
+        "label": "都道府県",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 47,
+        "options": [
+          "0: 東京都",
+          "1: 神奈川県",
+          "2: 千葉県",
+          "3: 埼玉県",
+          "4: 北海道",
+          "5: 青森県",
+          "6: 岩手県",
+          "7: 宮城県",
+          "8: 秋田県",
+          "9: 山形県",
+          "10: 福島県",
+          "11: 茨城県",
+          "12: 栃木県",
+          "13: 群馬県",
+          "14: 新潟県",
+          "15: 富山県",
+          "16: 石川県",
+          "17: 福井県",
+          "18: 山梨県",
+          "19: 長野県",
+          "20: 岐阜県",
+          "21: 静岡県",
+          "22: 愛知県",
+          "23: 三重県",
+          "24: 滋賀県",
+          "25: 京都府",
+          "26: 大阪府",
+          "27: 兵庫県",
+          "28: 奈良県",
+          "29: 和歌山県",
+          "30: 鳥取県",
+          "31: 島根県",
+          "32: 岡山県",
+          "33: 広島県",
+          "34: 山口県",
+          "35: 徳島県",
+          "36: 香川県",
+          "37: 愛媛県",
+          "38: 高知県",
+          "39: 福岡県",
+          "40: 佐賀県",
+          "41: 長崎県",
+          "42: 熊本県",
+          "43: 大分県",
+          "44: 宮崎県",
+          "45: 鹿児島県",
+          "46: 沖縄県"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 東京都, 1: 神奈川県, 2: 千葉県, 3: 埼玉県, 4: 北海道, 5: 青森県, 6: 岩手県, 7: 宮城県, 8: 秋田県, 9: 山形県, 10: 福島県, 11: 茨城県, 12: 栃木県, 13: 群馬県, 14: 新潟県, 15: 富山県, 16: 石川県, 17: 福井県, 18: 山梨県, 19: 長野県, 20: 岐阜県, 21: 静岡県, 22: 愛知県, 23: 三重県, 24: 滋賀県, 25: 京都府, 26: 大阪府, 27: 兵庫県, 28: 奈良県, 29: 和歌山県, 30: 鳥取県, 31: 島根県, 32: 岡山県, 33: 広島県, 34: 山口県, 35: 徳島県, 36: 香川県, 37: 愛媛県, 38: 高知県, 39: 福岡県, 40: 佐賀県, 41: 長崎県, 42: 熊本県, 43: 大分県, 44: 宮崎県, 45: 鹿児島県, 46: 沖縄県"
+      }
+    ]
+  },
+  "contacts": {
+    "total_select_properties": 73,
+    "in_table": [
+      "affiliation",
+      "ap_achievement",
+      "ap_conditions",
+      "ap_number",
+      "assessment_community",
+      "contact_building_age",
+      "contact_building_structure",
+      "contact_own_funds",
+      "contact_sales_gross",
+      "contact_service_area",
+      "contact_state",
+      "contact_station_distance",
+      "contact_yield",
+      "contractor_ap",
+      "contractor_area",
+      "contractor_area_category",
+      "contractor_bank",
+      "contractor_broker",
+      "contractor_buy_or_sell",
+      "contractor_buy_phase",
+      "contractor_channel",
+      "contractor_follow_rank",
+      "contractor_gross2",
+      "contractor_industry",
+      "contractor_property_type",
+      "contractor_sell_phase",
+      "contractor_type",
+      "decision_flow",
+      "graduate_experience",
+      "increase_referrals",
+      "information_acquisition_route",
+      "information_matchmaking",
+      "personal_sales",
+      "property_information_share",
+      "santame"
+    ],
+    "properties": [
+      {
+        "name": "affiliation",
+        "label": "所属",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 6,
+        "options": [
+          "0: 大手仲介",
+          "1: 物上げ",
+          "2: 銀行（系仲介）",
+          "3: 宅建番号5番以上",
+          "4: 大手アパート開発会社（系仲介）",
+          "5: その他"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 大手仲介, 1: 物上げ, 2: 銀行（系仲介）, 3: 宅建番号5番以上, 4: 大手アパート開発会社（系仲介）, 5: その他"
+      },
+      {
+        "name": "ap_achievement",
+        "label": "AP売却実績",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 6,
+        "options": [
+          "0: 年6件以上",
+          "1: 年3〜5件",
+          "2: 年2件",
+          "3: 年1件",
+          "4: 数件に1件",
+          "5: 実績なし"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 年6件以上, 1: 年3〜5件, 2: 年2件, 3: 年1件, 4: 数件に1件, 5: 実績なし"
+      },
+      {
+        "name": "ap_conditions",
+        "label": "管理条件付の取扱可否",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 2,
+        "options": [
+          "0: OK",
+          "1: NG"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: OK, 1: NG"
+      },
+      {
+        "name": "ap_number",
+        "label": "AP取り扱い件数",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 6,
+        "options": [
+          "0: 年6件以上",
+          "1: 年3〜5件",
+          "2: 年2件",
+          "3: 年1件",
+          "4: 数年に1件",
+          "5: 取り扱い無し"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 年6件以上, 1: 年3〜5件, 2: 年2件, 3: 年1件, 4: 数年に1件, 5: 取り扱い無し"
+      },
+      {
+        "name": "assessment_community",
+        "label": "APの紹介(査定)コミュニティ",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 5,
+        "options": [
+          "0: なし",
+          "1: 1〜3社",
+          "2: 4〜9社",
+          "3: 10〜19社",
+          "4: 20社〜"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: なし, 1: 1〜3社, 2: 4〜9社, 3: 10〜19社, 4: 20社〜"
+      },
+      {
+        "name": "contact_building_age",
+        "label": "築年数",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 6,
+        "options": [
+          "0: 1年未満（新築）",
+          "1: 〜10年以内",
+          "2: 10〜20年以内",
+          "3: 20年〜25年以内",
+          "4: 25年〜",
+          "5: 旧耐震 （1950年から1981年5月31日）"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 1年未満（新築）, 1: 〜10年以内, 2: 10〜20年以内, 3: 20年〜25年以内, 4: 25年〜, 5: 旧耐震 （1950年から1981年5月31日）"
+      },
+      {
+        "name": "contact_building_structure",
+        "label": "構造",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 5,
+        "options": [
+          "0: 木造",
+          "1: 軽量鉄骨造",
+          "2: S造",
+          "3: RC造",
+          "4: SRC造"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 木造, 1: 軽量鉄骨造, 2: S造, 3: RC造, 4: SRC造"
+      },
+      {
+        "name": "contact_own_funds",
+        "label": "自己資金",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 4,
+        "options": [
+          "0: 0 -500",
+          "1: -1000",
+          "2: -2000",
+          "3: 2000-"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 0 -500, 1: -1000, 2: -2000, 3: 2000-"
+      },
+      {
+        "name": "contact_sales_gross",
+        "label": "価格",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 8,
+        "options": [
+          "0: -3,000",
+          "1: 3,000-5,000",
+          "2: 5,000-10,000",
+          "3: 1〜3億",
+          "4: 3〜5億",
+          "5: 5億〜10億",
+          "6: 10億以上",
+          "7: その他"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: -3,000, 1: 3,000-5,000, 2: 5,000-10,000, 3: 1〜3億, 4: 3〜5億, 5: 5億〜10億, 6: 10億以上, 7: その他"
+      },
+      {
+        "name": "contact_service_area",
+        "label": "取扱エリア（販売）",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 14,
+        "options": [
+          "0: 東京",
+          "1: 神奈川",
+          "2: 千葉",
+          "3: 埼玉",
+          "4: その他（関東）",
+          "5: その他（北海道）",
+          "6: その他（東北）",
+          "7: その他（中部）",
+          "8: その他（関西）",
+          "9: その他（九州）",
+          "10: その他（四国）",
+          "11: その他（沖縄）",
+          "12: 全国",
+          "13: その他（海外）"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 東京, 1: 神奈川, 2: 千葉, 3: 埼玉, 4: その他（関東）, 5: その他（北海道）, 6: その他（東北）, 7: その他（中部）, 8: その他（関西）, 9: その他（九州）, 10: その他（四国）, 11: その他（沖縄）, 12: 全国, 13: その他（海外）"
+      },
+      {
+        "name": "contact_state",
+        "label": "都道府県",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 47,
+        "options": [
+          "0: 東京都",
+          "1: 神奈川県",
+          "2: 千葉県",
+          "3: 埼玉県",
+          "4: 北海道",
+          "5: 青森県",
+          "6: 岩手県",
+          "7: 宮城県",
+          "8: 秋田県",
+          "9: 山形県",
+          "10: 福島県",
+          "11: 茨城県",
+          "12: 栃木県",
+          "13: 群馬県",
+          "14: 新潟県",
+          "15: 富山県",
+          "16: 石川県",
+          "17: 福井県",
+          "18: 山梨県",
+          "19: 長野県",
+          "20: 岐阜県",
+          "21: 静岡県",
+          "22: 愛知県",
+          "23: 三重県",
+          "24: 滋賀県",
+          "25: 京都府",
+          "26: 大阪府",
+          "27: 兵庫県",
+          "28: 奈良県",
+          "29: 和歌山県",
+          "30: 鳥取県",
+          "31: 島根県",
+          "32: 岡山県",
+          "33: 広島県",
+          "34: 山口県",
+          "35: 徳島県",
+          "36: 香川県",
+          "37: 愛媛県",
+          "38: 高知県",
+          "39: 福岡県",
+          "40: 佐賀県",
+          "41: 長崎県",
+          "42: 熊本県",
+          "43: 大分県",
+          "44: 宮崎県",
+          "45: 鹿児島県",
+          "46: 沖縄県"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 東京都, 1: 神奈川県, 2: 千葉県, 3: 埼玉県, 4: 北海道, 5: 青森県, 6: 岩手県, 7: 宮城県, 8: 秋田県, 9: 山形県, 10: 福島県, 11: 茨城県, 12: 栃木県, 13: 群馬県, 14: 新潟県, 15: 富山県, 16: 石川県, 17: 福井県, 18: 山梨県, 19: 長野県, 20: 岐阜県, 21: 静岡県, 22: 愛知県, 23: 三重県, 24: 滋賀県, 25: 京都府, 26: 大阪府, 27: 兵庫県, 28: 奈良県, 29: 和歌山県, 30: 鳥取県, 31: 島根県, 32: 岡山県, 33: 広島県, 34: 山口県, 35: 徳島県, 36: 香川県, 37: 愛媛県, 38: 高知県, 39: 福岡県, 40: 佐賀県, 41: 長崎県, 42: 熊本県, 43: 大分県, 44: 宮崎県, 45: 鹿児島県, 46: 沖縄県"
+      },
+      {
+        "name": "contact_station_distance",
+        "label": "駅距離",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 4,
+        "options": [
+          "0: 10分以内",
+          "1: 15分以内",
+          "2: 20分以内",
+          "3: バス便"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 10分以内, 1: 15分以内, 2: 20分以内, 3: バス便"
+      },
+      {
+        "name": "contact_yield",
+        "label": "利回り（複数選択）",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 4,
+        "options": [
+          "0: 7%-",
+          "1: 8%-",
+          "2: 9%-",
+          "3: 10%-"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 7%-, 1: 8%-, 2: 9%-, 3: 10%-"
+      },
+      {
+        "name": "contractor_ap",
+        "label": "管理可否",
+        "field_type": "booleancheckbox",
+        "type": "enumeration",
+        "options_count": 2,
+        "options": [
+          "0: はい",
+          "1: いいえ"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: はい, 1: いいえ"
+      },
+      {
+        "name": "contractor_area",
+        "label": "取扱エリア（仕入）",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 14,
+        "options": [
+          "0: 東京",
+          "1: 神奈川",
+          "2: 千葉",
+          "3: 埼玉",
+          "4: その他（関東）",
+          "5: その他（北海道）",
+          "6: その他（東北）",
+          "7: その他（中部）",
+          "8: その他（関西）",
+          "9: その他（九州）",
+          "10: その他（四国）",
+          "11: その他（沖縄）",
+          "12: 全国",
+          "13: その他（海外）"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 東京, 1: 神奈川, 2: 千葉, 3: 埼玉, 4: その他（関東）, 5: その他（北海道）, 6: その他（東北）, 7: その他（中部）, 8: その他（関西）, 9: その他（九州）, 10: その他（四国）, 11: その他（沖縄）, 12: 全国, 13: その他（海外）"
+      },
+      {
+        "name": "contractor_area_category",
+        "label": "エリアカテゴリ",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 5,
+        "options": [
+          "0: 狭域の郊外（地元特化）",
+          "1: 1都3県（郊外寄り）",
+          "2: 1都3県（23区寄り）",
+          "3: 23区",
+          "4: 都心5区"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 狭域の郊外（地元特化）, 1: 1都3県（郊外寄り）, 2: 1都3県（23区寄り）, 3: 23区, 4: 都心5区"
+      },
+      {
+        "name": "contractor_bank",
+        "label": "金融機関",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 21,
+        "options": [
+          "0: 静岡銀行",
+          "1: トラスト",
+          "2: 滋賀銀行",
+          "3: auじぶん銀行",
+          "4: オリックス銀行",
+          "5: あすか信組",
+          "6: SBJ銀行",
+          "7: 香川銀行",
+          "8: 関西みらい",
+          "9: 西京銀行",
+          "10: 湘南信用金庫",
+          "11: スルガ銀行",
+          "12: セゾンファンデックス",
+          "13: 千葉銀行",
+          "14: 東京シティ信用金庫",
+          "15: 東京ベイ信用金庫",
+          "16: 東和銀行",
+          "17: 徳島大正銀行",
+          "18: 東日本銀行",
+          "19: 山梨中央銀行",
+          "20: 横浜銀行"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 静岡銀行, 1: トラスト, 2: 滋賀銀行, 3: auじぶん銀行, 4: オリックス銀行, 5: あすか信組, 6: SBJ銀行, 7: 香川銀行, 8: 関西みらい, 9: 西京銀行, 10: 湘南信用金庫, 11: スルガ銀行, 12: セゾンファンデックス, 13: 千葉銀行, 14: 東京シティ信用金庫, 15: 東京ベイ信用金庫, 16: 東和銀行, 17: 徳島大正銀行, 18: 東日本銀行, 19: 山梨中央銀行, 20: 横浜銀行"
+      },
+      {
+        "name": "contractor_broker",
+        "label": "ブローカー",
+        "field_type": "booleancheckbox",
+        "type": "enumeration",
+        "options_count": 2,
+        "options": [
+          "0: はい",
+          "1: いいえ"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: はい, 1: いいえ"
+      },
+      {
+        "name": "contractor_buy_or_sell",
+        "label": "仕入 or 売却",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 2,
+        "options": [
+          "0: 仕入",
+          "1: 売却"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 仕入, 1: 売却"
+      },
+      {
+        "name": "contractor_buy_phase",
+        "label": "仕入フェーズ",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 6,
+        "options": [
+          "0: S",
+          "1: A",
+          "2: B",
+          "3: C",
+          "4: D",
+          "5: Z"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: S, 1: A, 2: B, 3: C, 4: D, 5: Z"
+      },
+      {
+        "name": "contractor_channel",
+        "label": "チャネル",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 10,
+        "options": [
+          "0: RAINS",
+          "1: 健美家",
+          "2: 楽待",
+          "3: ハトマーク",
+          "4: ラビーネット",
+          "5: eight",
+          "6: 業者会",
+          "7: BIZMAP",
+          "8: リファラル",
+          "9: HP"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: RAINS, 1: 健美家, 2: 楽待, 3: ハトマーク, 4: ラビーネット, 5: eight, 6: 業者会, 7: BIZMAP, 8: リファラル, 9: HP"
+      },
+      {
+        "name": "contractor_follow_rank",
+        "label": "対応優先度",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 5,
+        "options": [
+          "0: S",
+          "1: A",
+          "2: B",
+          "3: C",
+          "4: D"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: S, 1: A, 2: B, 3: C, 4: D"
+      },
+      {
+        "name": "contractor_gross2",
+        "label": "グロス",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 6,
+        "options": [
+          "0: 〜1億",
+          "1: 1〜3億",
+          "2: 3〜5億",
+          "3: 5〜10億",
+          "4: 10億以上",
+          "5: その他"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 〜1億, 1: 1〜3億, 2: 3〜5億, 3: 5〜10億, 4: 10億以上, 5: その他"
+      },
+      {
+        "name": "contractor_industry",
+        "label": "業種",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 7,
+        "options": [
+          "0: 売買仲介（エンド）",
+          "1: 売買仲介（業者）",
+          "2: 買取",
+          "3: 買取（保有）",
+          "4: 賃貸仲介",
+          "5: 賃貸管理",
+          "6: その他"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 売買仲介（エンド）, 1: 売買仲介（業者）, 2: 買取, 3: 買取（保有）, 4: 賃貸仲介, 5: 賃貸管理, 6: その他"
+      },
+      {
+        "name": "contractor_property_type",
+        "label": "取扱種別",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 7,
+        "options": [
+          "0: 1棟AP",
+          "1: 1棟MS",
+          "2: 区分（投資）",
+          "3: ビル",
+          "4: 土地",
+          "5: 戸建て",
+          "6: その他"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 1棟AP, 1: 1棟MS, 2: 区分（投資）, 3: ビル, 4: 土地, 5: 戸建て, 6: その他"
+      },
+      {
+        "name": "contractor_sell_phase",
+        "label": "販売フェーズ",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 6,
+        "options": [
+          "0: S",
+          "1: A",
+          "2: B",
+          "3: C",
+          "4: D",
+          "5: Z"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: S, 1: A, 2: B, 3: C, 4: D, 5: Z"
+      },
+      {
+        "name": "contractor_type",
+        "label": "顧客属性",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 2,
+        "options": [
+          "0: 大手仲介",
+          "1: 元・大手仲介"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 大手仲介, 1: 元・大手仲介"
+      },
+      {
+        "name": "decision_flow",
+        "label": "決議方法",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 3,
+        "options": [
+          "0: 稟議なし（社長直下）",
+          "1: 稟議あり",
+          "2: その他"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 稟議なし（社長直下）, 1: 稟議あり, 2: その他"
+      },
+      {
+        "name": "graduate_experience",
+        "label": "出身/経験",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 5,
+        "options": [
+          "0: 大手仲介",
+          "1: 銀行（系仲介）",
+          "2: 証券会社（系仲介）",
+          "3: 中古アパート買取",
+          "4: 保険会社"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 大手仲介, 1: 銀行（系仲介）, 2: 証券会社（系仲介）, 3: 中古アパート買取, 4: 保険会社"
+      },
+      {
+        "name": "increase_referrals",
+        "label": "APの紹介先を増やしたいか",
+        "field_type": "booleancheckbox",
+        "type": "enumeration",
+        "options_count": 2,
+        "options": [
+          "0: はい",
+          "1: いいえ"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: はい, 1: いいえ"
+      },
+      {
+        "name": "information_acquisition_route",
+        "label": "情報取得ルート",
+        "field_type": "checkbox",
+        "type": "enumeration",
+        "options_count": 6,
+        "options": [
+          "0: オーナー管理",
+          "1: 士業（弁護士・税理士）",
+          "2: 物上げ",
+          "3: 相続",
+          "4: 任売",
+          "5: その他"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: オーナー管理, 1: 士業（弁護士・税理士）, 2: 物上げ, 3: 相続, 4: 任売, 5: その他"
+      },
+      {
+        "name": "information_matchmaking",
+        "label": "情報精度見合い度",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 5,
+        "options": [
+          "0: 全部見合っている",
+          "1: ほとんど見合っている",
+          "2: 半分程度見合っている",
+          "3: ほとんど見合っていない",
+          "4: 全く見合ってない"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 全部見合っている, 1: ほとんど見合っている, 2: 半分程度見合っている, 3: ほとんど見合っていない, 4: 全く見合ってない"
+      },
+      {
+        "name": "personal_sales",
+        "label": "個別営業の有無",
+        "field_type": "booleancheckbox",
+        "type": "enumeration",
+        "options_count": 2,
+        "options": [
+          "0: はい",
+          "1: いいえ"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: はい, 1: いいえ"
+      },
+      {
+        "name": "property_information_share",
+        "label": "物件情報の社内共有",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 2,
+        "options": [
+          "0: OK",
+          "1: NG"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: OK, 1: NG"
+      },
+      {
+        "name": "santame",
+        "label": "三為",
+        "field_type": "select",
+        "type": "enumeration",
+        "options_count": 2,
+        "options": [
+          "0: OK",
+          "1: NG"
+        ],
+        "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: OK, 1: NG"
+      }
+    ]
+  }
+}

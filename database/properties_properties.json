@@ -1,0 +1,2406 @@
+[
+  {
+    "updatedAt": "2025-06-18T07:51:28.977Z",
+    "createdAt": "2025-06-18T07:51:28.977Z",
+    "name": "access_road",
+    "label": "接道",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T07:57:43.627Z",
+    "createdAt": "2025-06-18T07:57:43.627Z",
+    "name": "altitude_area",
+    "label": "高度地区",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T07:52:36.876Z",
+    "createdAt": "2025-06-18T07:52:36.876Z",
+    "name": "building_coverage_ratio",
+    "label": "建蔽率",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-08-21T05:28:15.610Z",
+    "createdAt": "2025-08-21T05:28:15.610Z",
+    "name": "building_coverage_ratio2",
+    "label": "建蔽率2",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-04-15T18:17:52.404Z",
+    "createdAt": "2025-03-17T07:43:40.818Z",
+    "name": "bukken_address",
+    "label": "番地以下",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "70753971",
+    "updatedUserId": "70753971",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-04-15T18:19:39.860Z",
+    "createdAt": "2025-04-15T18:19:39.860Z",
+    "name": "bukken_age",
+    "label": "築年数",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "bukken_information",
+    "options": [],
+    "createdUserId": "70753971",
+    "updatedUserId": "70753971",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-07-28T09:25:00.442Z",
+    "createdAt": "2025-07-28T07:36:52.834Z",
+    "name": "bukken_brief",
+    "label": "物件概要書",
+    "type": "string",
+    "fieldType": "file",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-09-29T01:46:53.676Z",
+    "createdAt": "2025-09-29T01:14:05.147Z",
+    "name": "bukken_building_cost_estimate",
+    "label": "建物積算",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-04-15T18:16:25.663Z",
+    "createdAt": "2025-03-17T07:42:13.906Z",
+    "name": "bukken_city",
+    "label": "市区町村",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "70753971",
+    "updatedUserId": "70753971",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-04-15T18:18:23.531Z",
+    "createdAt": "2025-03-17T08:17:25.716Z",
+    "name": "bukken_completion_years",
+    "label": "竣工年月",
+    "type": "date",
+    "fieldType": "date",
+    "description": "年月のみの登録で可。（日は1日で統一）",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "70753971",
+    "updatedUserId": "70753971",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": false,
+    "dateDisplayHint": "absolute",
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-07-16T07:08:59.358Z",
+    "createdAt": "2025-07-16T07:02:55.972Z",
+    "name": "bukken_creator",
+    "label": "作成者",
+    "type": "enumeration",
+    "fieldType": "select",
+    "description": "専用に作成した作成者プロパティ。元々ある作成者はAPIから送信できないため、作成。",
+    "groupName": "bukken_information",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "referencedObjectType": "OWNER",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-04-15T18:16:12.225Z",
+    "createdAt": "2025-03-17T08:09:38.232Z",
+    "name": "bukken_floor",
+    "label": "階数",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "70753971",
+    "updatedUserId": "70753971",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-05-21T06:54:37.326Z",
+    "createdAt": "2025-05-21T06:54:37.326Z",
+    "name": "bukken_folder_url",
+    "label": "フォルダ URL",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "70753971",
+    "updatedUserId": "70753971",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-04-15T18:16:41.272Z",
+    "createdAt": "2025-03-17T08:09:56.058Z",
+    "name": "bukken_houses",
+    "label": "戸数",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "70753971",
+    "updatedUserId": "70753971",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-04-15T18:18:00.959Z",
+    "createdAt": "2025-03-17T16:38:19.791Z",
+    "name": "bukken_land_area",
+    "label": "土地面積",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "70753971",
+    "updatedUserId": "70753971",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-07-01T15:29:18.237Z",
+    "createdAt": "2025-07-01T15:29:18.237Z",
+    "name": "bukken_land_estimation",
+    "label": "土地積算",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-04-15T18:17:30.260Z",
+    "createdAt": "2025-01-08T01:23:50.002Z",
+    "name": "bukken_name",
+    "label": "物件名",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "updatedUserId": "70753971",
+    "displayOrder": 0,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-09-17T09:04:29.510Z",
+    "createdAt": "2025-09-17T09:04:29.510Z",
+    "name": "bukken_property_land",
+    "label": "建物/土地の種類",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [
+      {
+        "label": "居宅",
+        "value": "居宅",
+        "description": "",
+        "displayOrder": 0,
+        "hidden": false
+      },
+      {
+        "label": "店舗",
+        "value": "店舗",
+        "description": "",
+        "displayOrder": 1,
+        "hidden": false
+      },
+      {
+        "label": "寄宿舎",
+        "value": "寄宿舎",
+        "description": "",
+        "displayOrder": 2,
+        "hidden": false
+      },
+      {
+        "label": "共同住宅",
+        "value": "共同住宅",
+        "description": "",
+        "displayOrder": 3,
+        "hidden": false
+      },
+      {
+        "label": "事務所",
+        "value": "事務所",
+        "description": "",
+        "displayOrder": 4,
+        "hidden": false
+      },
+      {
+        "label": "旅館",
+        "value": "旅館",
+        "description": "",
+        "displayOrder": 5,
+        "hidden": false
+      },
+      {
+        "label": "料理店",
+        "value": "料理店",
+        "description": "",
+        "displayOrder": 6,
+        "hidden": false
+      },
+      {
+        "label": "工場",
+        "value": "工場",
+        "description": "",
+        "displayOrder": 7,
+        "hidden": false
+      },
+      {
+        "label": "倉庫",
+        "value": "倉庫",
+        "description": "",
+        "displayOrder": 8,
+        "hidden": false
+      },
+      {
+        "label": "車庫",
+        "value": "車庫",
+        "description": "",
+        "displayOrder": 9,
+        "hidden": false
+      },
+      {
+        "label": "発電所",
+        "value": "発電所",
+        "description": "",
+        "displayOrder": 10,
+        "hidden": false
+      },
+      {
+        "label": "変電所",
+        "value": "変電所",
+        "description": "",
+        "displayOrder": 11,
+        "hidden": false
+      },
+      {
+        "label": "校舎",
+        "value": "校舎",
+        "description": "",
+        "displayOrder": 12,
+        "hidden": false
+      },
+      {
+        "label": "講堂",
+        "value": "講堂",
+        "description": "",
+        "displayOrder": 13,
+        "hidden": false
+      },
+      {
+        "label": "研究所",
+        "value": "研究所",
+        "description": "",
+        "displayOrder": 14,
+        "hidden": false
+      },
+      {
+        "label": "病院",
+        "value": "病院",
+        "description": "",
+        "displayOrder": 15,
+        "hidden": false
+      },
+      {
+        "label": "診療所",
+        "value": "診療所",
+        "description": "",
+        "displayOrder": 16,
+        "hidden": false
+      },
+      {
+        "label": "集会所",
+        "value": "集会所",
+        "description": "",
+        "displayOrder": 17,
+        "hidden": false
+      },
+      {
+        "label": "公会堂",
+        "value": "公会堂",
+        "description": "",
+        "displayOrder": 18,
+        "hidden": false
+      },
+      {
+        "label": "停車場",
+        "value": "停車場",
+        "description": "",
+        "displayOrder": 19,
+        "hidden": false
+      },
+      {
+        "label": "劇場",
+        "value": "劇場",
+        "description": "",
+        "displayOrder": 20,
+        "hidden": false
+      },
+      {
+        "label": "映画館",
+        "value": "映画館",
+        "description": "",
+        "displayOrder": 21,
+        "hidden": false
+      },
+      {
+        "label": "遊技場",
+        "value": "遊技場",
+        "description": "",
+        "displayOrder": 22,
+        "hidden": false
+      },
+      {
+        "label": "競技場",
+        "value": "競技場",
+        "description": "",
+        "displayOrder": 23,
+        "hidden": false
+      },
+      {
+        "label": "野球場",
+        "value": "野球場",
+        "description": "",
+        "displayOrder": 24,
+        "hidden": false
+      },
+      {
+        "label": "競馬場",
+        "value": "競馬場",
+        "description": "",
+        "displayOrder": 25,
+        "hidden": false
+      },
+      {
+        "label": "公衆浴場",
+        "value": "公衆浴場",
+        "description": "",
+        "displayOrder": 26,
+        "hidden": false
+      },
+      {
+        "label": "火葬場",
+        "value": "火葬場",
+        "description": "",
+        "displayOrder": 27,
+        "hidden": false
+      },
+      {
+        "label": "守衛所",
+        "value": "守衛所",
+        "description": "",
+        "displayOrder": 28,
+        "hidden": false
+      },
+      {
+        "label": "茶室",
+        "value": "茶室",
+        "description": "",
+        "displayOrder": 29,
+        "hidden": false
+      },
+      {
+        "label": "温室",
+        "value": "温室",
+        "description": "",
+        "displayOrder": 30,
+        "hidden": false
+      },
+      {
+        "label": "蚕室",
+        "value": "蚕室",
+        "description": "",
+        "displayOrder": 31,
+        "hidden": false
+      },
+      {
+        "label": "物置",
+        "value": "物置",
+        "description": "",
+        "displayOrder": 32,
+        "hidden": false
+      },
+      {
+        "label": "便所",
+        "value": "便所",
+        "description": "",
+        "displayOrder": 33,
+        "hidden": false
+      },
+      {
+        "label": "鶏舎",
+        "value": "鶏舎",
+        "description": "",
+        "displayOrder": 34,
+        "hidden": false
+      },
+      {
+        "label": "酪農舎",
+        "value": "酪農舎",
+        "description": "",
+        "displayOrder": 35,
+        "hidden": false
+      },
+      {
+        "label": "給油所",
+        "value": "給油所",
+        "description": "",
+        "displayOrder": 36,
+        "hidden": false
+      }
+    ],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-07-01T15:10:11.375Z",
+    "createdAt": "2025-07-01T15:07:01.313Z",
+    "name": "bukken_road_price",
+    "label": "路線価",
+    "type": "number",
+    "fieldType": "number",
+    "description": "物件オブジェクトの路面価",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-04-15T18:18:14.513Z",
+    "createdAt": "2025-03-17T07:41:47.868Z",
+    "name": "bukken_state",
+    "label": "都道府県",
+    "type": "enumeration",
+    "fieldType": "select",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [
+      {
+        "label": "東京都",
+        "value": "東京都",
+        "description": "",
+        "displayOrder": 0,
+        "hidden": false
+      },
+      {
+        "label": "神奈川県",
+        "value": "神奈川県",
+        "description": "",
+        "displayOrder": 1,
+        "hidden": false
+      },
+      {
+        "label": "千葉県",
+        "value": "千葉県",
+        "description": "",
+        "displayOrder": 2,
+        "hidden": false
+      },
+      {
+        "label": "埼玉県",
+        "value": "埼玉県",
+        "description": "",
+        "displayOrder": 3,
+        "hidden": false
+      },
+      {
+        "label": "北海道",
+        "value": "北海道",
+        "description": "",
+        "displayOrder": 4,
+        "hidden": false
+      },
+      {
+        "label": "青森県",
+        "value": "青森県",
+        "description": "",
+        "displayOrder": 5,
+        "hidden": false
+      },
+      {
+        "label": "岩手県",
+        "value": "岩手県",
+        "description": "",
+        "displayOrder": 6,
+        "hidden": false
+      },
+      {
+        "label": "宮城県",
+        "value": "宮城県",
+        "description": "",
+        "displayOrder": 7,
+        "hidden": false
+      },
+      {
+        "label": "秋田県",
+        "value": "秋田県",
+        "description": "",
+        "displayOrder": 8,
+        "hidden": false
+      },
+      {
+        "label": "山形県",
+        "value": "山形県",
+        "description": "",
+        "displayOrder": 9,
+        "hidden": false
+      },
+      {
+        "label": "福島県",
+        "value": "福島県",
+        "description": "",
+        "displayOrder": 10,
+        "hidden": false
+      },
+      {
+        "label": "茨城県",
+        "value": "茨城県",
+        "description": "",
+        "displayOrder": 11,
+        "hidden": false
+      },
+      {
+        "label": "栃木県",
+        "value": "栃木県",
+        "description": "",
+        "displayOrder": 12,
+        "hidden": false
+      },
+      {
+        "label": "群馬県",
+        "value": "群馬県",
+        "description": "",
+        "displayOrder": 13,
+        "hidden": false
+      },
+      {
+        "label": "新潟県",
+        "value": "新潟県",
+        "description": "",
+        "displayOrder": 14,
+        "hidden": false
+      },
+      {
+        "label": "富山県",
+        "value": "富山県",
+        "description": "",
+        "displayOrder": 15,
+        "hidden": false
+      },
+      {
+        "label": "石川県",
+        "value": "石川県",
+        "description": "",
+        "displayOrder": 16,
+        "hidden": false
+      },
+      {
+        "label": "福井県",
+        "value": "福井県",
+        "description": "",
+        "displayOrder": 17,
+        "hidden": false
+      },
+      {
+        "label": "山梨県",
+        "value": "山梨県",
+        "description": "",
+        "displayOrder": 18,
+        "hidden": false
+      },
+      {
+        "label": "長野県",
+        "value": "長野県",
+        "description": "",
+        "displayOrder": 19,
+        "hidden": false
+      },
+      {
+        "label": "岐阜県",
+        "value": "岐阜県",
+        "description": "",
+        "displayOrder": 20,
+        "hidden": false
+      },
+      {
+        "label": "静岡県",
+        "value": "静岡県",
+        "description": "",
+        "displayOrder": 21,
+        "hidden": false
+      },
+      {
+        "label": "愛知県",
+        "value": "愛知県",
+        "description": "",
+        "displayOrder": 22,
+        "hidden": false
+      },
+      {
+        "label": "三重県",
+        "value": "三重県",
+        "description": "",
+        "displayOrder": 23,
+        "hidden": false
+      },
+      {
+        "label": "滋賀県",
+        "value": "滋賀県",
+        "description": "",
+        "displayOrder": 24,
+        "hidden": false
+      },
+      {
+        "label": "京都府",
+        "value": "京都府",
+        "description": "",
+        "displayOrder": 25,
+        "hidden": false
+      },
+      {
+        "label": "大阪府",
+        "value": "大阪府",
+        "description": "",
+        "displayOrder": 26,
+        "hidden": false
+      },
+      {
+        "label": "兵庫県",
+        "value": "兵庫県",
+        "description": "",
+        "displayOrder": 27,
+        "hidden": false
+      },
+      {
+        "label": "奈良県",
+        "value": "奈良県",
+        "description": "",
+        "displayOrder": 28,
+        "hidden": false
+      },
+      {
+        "label": "和歌山県",
+        "value": "和歌山県",
+        "description": "",
+        "displayOrder": 29,
+        "hidden": false
+      },
+      {
+        "label": "鳥取県",
+        "value": "鳥取県",
+        "description": "",
+        "displayOrder": 30,
+        "hidden": false
+      },
+      {
+        "label": "島根県",
+        "value": "島根県",
+        "description": "",
+        "displayOrder": 31,
+        "hidden": false
+      },
+      {
+        "label": "岡山県",
+        "value": "岡山県",
+        "description": "",
+        "displayOrder": 32,
+        "hidden": false
+      },
+      {
+        "label": "広島県",
+        "value": "広島県",
+        "description": "",
+        "displayOrder": 33,
+        "hidden": false
+      },
+      {
+        "label": "山口県",
+        "value": "山口県",
+        "description": "",
+        "displayOrder": 34,
+        "hidden": false
+      },
+      {
+        "label": "徳島県",
+        "value": "徳島県",
+        "description": "",
+        "displayOrder": 35,
+        "hidden": false
+      },
+      {
+        "label": "香川県",
+        "value": "香川県",
+        "description": "",
+        "displayOrder": 36,
+        "hidden": false
+      },
+      {
+        "label": "愛媛県",
+        "value": "愛媛県",
+        "description": "",
+        "displayOrder": 37,
+        "hidden": false
+      },
+      {
+        "label": "高知県",
+        "value": "高知県",
+        "description": "",
+        "displayOrder": 38,
+        "hidden": false
+      },
+      {
+        "label": "福岡県",
+        "value": "福岡県",
+        "description": "",
+        "displayOrder": 39,
+        "hidden": false
+      },
+      {
+        "label": "佐賀県",
+        "value": "佐賀県",
+        "description": "",
+        "displayOrder": 40,
+        "hidden": false
+      },
+      {
+        "label": "長崎県",
+        "value": "長崎県",
+        "description": "",
+        "displayOrder": 41,
+        "hidden": false
+      },
+      {
+        "label": "熊本県",
+        "value": "熊本県",
+        "description": "",
+        "displayOrder": 42,
+        "hidden": false
+      },
+      {
+        "label": "大分県",
+        "value": "大分県",
+        "description": "",
+        "displayOrder": 43,
+        "hidden": false
+      },
+      {
+        "label": "宮崎県",
+        "value": "宮崎県",
+        "description": "",
+        "displayOrder": 44,
+        "hidden": false
+      },
+      {
+        "label": "鹿児島県",
+        "value": "鹿児島県",
+        "description": "",
+        "displayOrder": 45,
+        "hidden": false
+      },
+      {
+        "label": "沖縄県",
+        "value": "沖縄県",
+        "description": "",
+        "displayOrder": 46,
+        "hidden": false
+      }
+    ],
+    "createdUserId": "70753971",
+    "updatedUserId": "70753971",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-09-19T02:05:18.199Z",
+    "createdAt": "2025-03-17T08:03:21.539Z",
+    "name": "bukken_structure",
+    "label": "構造",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [
+      {
+        "label": "木造",
+        "value": "木造",
+        "description": "",
+        "displayOrder": 0,
+        "hidden": false
+      },
+      {
+        "label": "SRC造",
+        "value": "SRC造",
+        "description": "",
+        "displayOrder": 1,
+        "hidden": false
+      },
+      {
+        "label": "RC造",
+        "value": "RC造",
+        "description": "",
+        "displayOrder": 2,
+        "hidden": false
+      },
+      {
+        "label": "S造",
+        "value": "S造",
+        "description": "",
+        "displayOrder": 3,
+        "hidden": false
+      },
+      {
+        "label": "軽量鉄骨造",
+        "value": "軽量鉄骨造",
+        "description": "",
+        "displayOrder": 4,
+        "hidden": false
+      }
+    ],
+    "createdUserId": "70753971",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-09-26T06:04:56.120Z",
+    "createdAt": "2025-03-17T08:02:27.293Z",
+    "name": "bukken_type",
+    "label": "種別",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [
+      {
+        "label": "1棟AP",
+        "value": "AP",
+        "description": "",
+        "displayOrder": 0,
+        "hidden": false
+      },
+      {
+        "label": "1棟MS",
+        "value": "レジ",
+        "description": "",
+        "displayOrder": 1,
+        "hidden": false
+      },
+      {
+        "label": "区分",
+        "value": "区分MS",
+        "description": "",
+        "displayOrder": 2,
+        "hidden": false
+      },
+      {
+        "label": "ビル",
+        "value": "ビル",
+        "description": "",
+        "displayOrder": 3,
+        "hidden": false
+      },
+      {
+        "label": "土地",
+        "value": "土地",
+        "description": "",
+        "displayOrder": 4,
+        "hidden": false
+      },
+      {
+        "label": "戸建て",
+        "value": "戸建",
+        "description": "",
+        "displayOrder": 5,
+        "hidden": false
+      },
+      {
+        "label": "その他",
+        "value": "その他",
+        "description": "",
+        "displayOrder": 6,
+        "hidden": false
+      }
+    ],
+    "createdUserId": "70753971",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T08:04:49.885Z",
+    "createdAt": "2025-06-18T08:04:49.885Z",
+    "name": "electricity",
+    "label": "電気",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-08-21T05:05:25.873Z",
+    "createdAt": "2025-06-18T07:58:44.079Z",
+    "name": "fire_prevention_area",
+    "label": "防火地域",
+    "type": "enumeration",
+    "fieldType": "select",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [
+      {
+        "label": "なし",
+        "value": "なし",
+        "description": "",
+        "displayOrder": 0,
+        "hidden": false
+      },
+      {
+        "label": "防火地域",
+        "value": "防火地域",
+        "description": "",
+        "displayOrder": 1,
+        "hidden": false
+      },
+      {
+        "label": "準防火地域",
+        "value": "準防火地域",
+        "description": "",
+        "displayOrder": 2,
+        "hidden": false
+      },
+      {
+        "label": "法22条区域",
+        "value": "法22条区域",
+        "description": "",
+        "displayOrder": 3,
+        "hidden": false
+      },
+      {
+        "label": "新たな防火地域",
+        "value": "新たな防火地域",
+        "description": "",
+        "displayOrder": 4,
+        "hidden": false
+      }
+    ],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T07:53:33.774Z",
+    "createdAt": "2025-06-18T07:53:33.774Z",
+    "name": "floor_area_ratio",
+    "label": "容積率",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-08-21T05:27:36.945Z",
+    "createdAt": "2025-08-21T05:27:36.945Z",
+    "name": "floor_area_ratio2",
+    "label": "容積率2",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T08:04:18.262Z",
+    "createdAt": "2025-06-18T08:04:18.262Z",
+    "name": "gas",
+    "label": "ガス",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_all_accessible_team_ids",
+    "label": "All teams",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "The team IDs, including the team hierarchy, of all default and custom owner properties for this record.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_all_assigned_business_unit_ids",
+    "label": "Business units",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "The business units this record is assigned to.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": false
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_all_owner_ids",
+    "label": "All owner IDs",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "Values of all default and custom owner properties for this record.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_all_team_ids",
+    "label": "All team IDs",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "The team IDs of all default and custom owner properties for this record.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_created_by_user_id",
+    "label": "Created by user ID",
+    "type": "number",
+    "fieldType": "number",
+    "description": "The user who created this record. This value is set automatically by HubSpot.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_createdate",
+    "label": "Object create date/time",
+    "type": "datetime",
+    "fieldType": "date",
+    "description": "The date and time at which this object was created. This value is automatically set by HubSpot and may not be modified.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_lastmodifieddate",
+    "label": "Object last modified date/time",
+    "type": "datetime",
+    "fieldType": "date",
+    "description": "Most recent timestamp of any property update for this object. This includes HubSpot internal properties, which can be visible or hidden. This property is updated automatically.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_merged_object_ids",
+    "label": "Merged record IDs",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "The list of record IDs that have been merged into this record. This value is set automatically by HubSpot.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_object_id",
+    "label": "Record ID",
+    "type": "number",
+    "fieldType": "number",
+    "description": "The unique ID for this record. This value is set automatically by HubSpot.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_object_source",
+    "label": "Record creation source",
+    "type": "string",
+    "fieldType": "text",
+    "description": "Raw internal PropertySource present in the RequestMeta when this record was created.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_object_source_detail_1",
+    "label": "Record source detail 1",
+    "type": "string",
+    "fieldType": "text",
+    "description": "First level of detail on how this record was created.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_object_source_detail_2",
+    "label": "Record source detail 2",
+    "type": "string",
+    "fieldType": "text",
+    "description": "Second level of detail on how this record was created.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_object_source_detail_3",
+    "label": "Record source detail 3",
+    "type": "string",
+    "fieldType": "text",
+    "description": "Third level of detail on how this record was created.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_object_source_id",
+    "label": "Record creation source ID",
+    "type": "string",
+    "fieldType": "text",
+    "description": "Raw internal sourceId present in the RequestMeta when this record was created.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_object_source_label",
+    "label": "Record source",
+    "type": "enumeration",
+    "fieldType": "select",
+    "description": "How this record was created.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_object_source_user_id",
+    "label": "Record creation source user ID",
+    "type": "number",
+    "fieldType": "number",
+    "description": "Raw internal userId present in the RequestMeta when this record was created.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_owning_teams",
+    "label": "Owning Teams",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "The teams that are attributed to this record.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": false
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-01-08T01:23:50.097Z",
+    "createdAt": "2025-01-08T01:23:50.097Z",
+    "name": "hs_pinned_engagement_id",
+    "label": "Pinned Engagement ID",
+    "type": "number",
+    "fieldType": "number",
+    "description": "The object ID of the current pinned engagement. This will only be shown in the app if there is already an association to the engagement.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": false
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_read_only",
+    "label": "Read only object",
+    "type": "bool",
+    "fieldType": "booleancheckbox",
+    "description": "Determines whether a record can be edited by a user.",
+    "groupName": "bukken_information",
+    "options": [
+      {
+        "label": "True",
+        "value": "true",
+        "displayOrder": 0,
+        "hidden": false
+      },
+      {
+        "label": "False",
+        "value": "false",
+        "displayOrder": 1,
+        "hidden": false
+      }
+    ],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_shared_team_ids",
+    "label": "Shared teams",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "Additional teams whose users can access the record based on their permissions. This can be set manually or through Workflows or APIs.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": false
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_shared_user_ids",
+    "label": "Shared users",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "Additional users that can access the record based on their permissions. This can be set manually or through Workflows and APIs.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": false
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_unique_creation_key",
+    "label": "Unique creation key",
+    "type": "string",
+    "fieldType": "text",
+    "description": "Unique property used for idempotent creates",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": true,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_updated_by_user_id",
+    "label": "Updated by user ID",
+    "type": "number",
+    "fieldType": "number",
+    "description": "The user who last updated this record. This value is set automatically by HubSpot.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_user_ids_of_all_notification_followers",
+    "label": "User IDs of all notification followers",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "The user IDs of all users that have clicked follow within the object to opt-in to getting follow notifications",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_user_ids_of_all_notification_unfollowers",
+    "label": "User IDs of all notification unfollowers",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "The user IDs of all object owners that have clicked unfollow within the object to opt-out of getting follow notifications",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_user_ids_of_all_owners",
+    "label": "User IDs of all owners",
+    "type": "enumeration",
+    "fieldType": "checkbox",
+    "description": "The user IDs of all owners of this record.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hs_was_imported",
+    "label": "Performed in an import",
+    "type": "bool",
+    "fieldType": "booleancheckbox",
+    "description": "Object is part of an import",
+    "groupName": "bukken_information",
+    "options": [
+      {
+        "label": "True",
+        "value": "true",
+        "displayOrder": 0,
+        "hidden": false
+      },
+      {
+        "label": "False",
+        "value": "false",
+        "displayOrder": 1,
+        "hidden": false
+      }
+    ],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": true,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hubspot_owner_assigneddate",
+    "label": "Owner assigned date",
+    "type": "datetime",
+    "fieldType": "date",
+    "description": "The most recent timestamp of when an owner was assigned to this record. This value is set automatically by HubSpot.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hubspot_owner_id",
+    "label": "Owner",
+    "type": "enumeration",
+    "fieldType": "select",
+    "description": "The owner of the object.",
+    "groupName": "bukken_information",
+    "options": [],
+    "referencedObjectType": "OWNER",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": false
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "name": "hubspot_team_id",
+    "label": "Owner's main team",
+    "type": "enumeration",
+    "fieldType": "select",
+    "description": "The main team of the record owner. This value is set automatically by HubSpot.",
+    "groupName": "bukken_information",
+    "options": [],
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": true,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "hubspotDefined": true,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": true,
+      "readOnlyValue": true
+    },
+    "formField": false,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T07:34:07.533Z",
+    "createdAt": "2025-06-18T07:34:07.533Z",
+    "name": "land_number",
+    "label": "地番",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T08:01:20.798Z",
+    "createdAt": "2025-06-18T08:01:20.798Z",
+    "name": "other_restrictions",
+    "label": "その他制限",
+    "type": "string",
+    "fieldType": "textarea",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T08:05:21.495Z",
+    "createdAt": "2025-06-18T08:05:21.495Z",
+    "name": "parking",
+    "label": "駐車場",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T08:07:20.013Z",
+    "createdAt": "2025-06-18T08:07:20.013Z",
+    "name": "property_remarks",
+    "label": "備考（物件情報）",
+    "type": "string",
+    "fieldType": "textarea",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T08:03:51.527Z",
+    "createdAt": "2025-06-18T08:03:51.527Z",
+    "name": "sewage",
+    "label": "下水",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T07:48:22.270Z",
+    "createdAt": "2025-06-18T07:48:22.270Z",
+    "name": "total_floor_area",
+    "label": "延床面積",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T07:49:52.725Z",
+    "createdAt": "2025-06-18T07:49:52.725Z",
+    "name": "tsubo",
+    "label": "坪",
+    "type": "number",
+    "fieldType": "number",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "showCurrencySymbol": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T07:55:07.153Z",
+    "createdAt": "2025-06-18T07:55:07.153Z",
+    "name": "urban_planning",
+    "label": "都市計画",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T08:03:13.579Z",
+    "createdAt": "2025-06-18T08:03:13.579Z",
+    "name": "water_supply",
+    "label": "水道",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-06-18T07:56:15.298Z",
+    "createdAt": "2025-06-18T07:56:15.298Z",
+    "name": "zoning",
+    "label": "用途地域",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  },
+  {
+    "updatedAt": "2025-08-21T05:26:51.940Z",
+    "createdAt": "2025-08-21T05:26:51.940Z",
+    "name": "zoning2",
+    "label": "用途地域2",
+    "type": "string",
+    "fieldType": "text",
+    "description": "",
+    "groupName": "【利用中】物件情報",
+    "options": [],
+    "createdUserId": "73228827",
+    "updatedUserId": "73228827",
+    "displayOrder": -1,
+    "calculated": false,
+    "externalOptions": false,
+    "archived": false,
+    "hasUniqueValue": false,
+    "hidden": false,
+    "modificationMetadata": {
+      "archivable": true,
+      "readOnlyDefinition": false,
+      "readOnlyValue": false
+    },
+    "formField": true,
+    "dataSensitivity": "non_sensitive"
+  }
+]

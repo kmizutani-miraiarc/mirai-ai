@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mirai AI - APIキー管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.css">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .sidebar a:hover {
+            background: #34495e;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .api-key-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 sidebar">
+                <h4>Mirai AI</h4>
+                <hr>
+                <a href="/admin/dashboard">
+                    <i data-feather="home"></i> ダッシュボード
+                </a>
+                <a href="/admin/api-keys">
+                    <i data-feather="key"></i> APIキー管理
+                </a>
+                <a href="/chat">
+                    <i data-feather="message-circle"></i> チャット
+                </a>
+                <hr>
+                <a href="/auth/logout">
+                    <i data-feather="log-out"></i> ログアウト
+                </a>
+            </div>
+            <div class="col-md-10 main-content">
+                <h1>APIキー管理</h1>
+                
+                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createModal">
+                    <i data-feather="plus"></i> 新しいAPIキーを作成
+                </button>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>サイト名</th>
+                            <th>APIキー（プレフィックス）</th>
+                            <th>説明</th>
+                            <th>状態</th>
+                            <th>作成日時</th>
+                            <th>最終使用</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key in api_keys %}
+                        <tr>
+                            <td>{{ key.site_name }}</td>
+                            <td><code>{{ key.api_key_prefix }}</code></td>
+                            <td>{{ key.description or '-' }}</td>
+                            <td>
+                                {% if key.is_active %}
+                                <span class="badge bg-success">有効</span>
+                                {% else %}
+                                <span class="badge bg-secondary">無効</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ key.created_at.strftime('%Y-%m-%d %H:%M') if key.created_at else '-' }}</td>
+                            <td>{{ key.last_used_at.strftime('%Y-%m-%d %H:%M') if key.last_used_at else '未使用' }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="toggleKey({{ key.id }})">
+                                    {% if key.is_active %}無効化{% else %}有効化{% endif %}
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteKey({{ key.id }})">削除</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 作成モーダル -->
+    <div class="modal fade" id="createModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">新しいAPIキーを作成</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createForm">
+                        <div class="mb-3">
+                            <label class="form-label">サイト名 *</label>
+                            <input type="text" class="form-control" name="site_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">説明</label>
+                            <textarea class="form-control" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">有効期限（日数、空欄で無期限）</label>
+                            <input type="number" class="form-control" name="expires_days" min="1">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-primary" onclick="createKey()">作成</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APIキー表示モーダル -->
+    <div class="modal fade" id="keyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">APIキーが作成されました</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>重要:</strong> このAPIキーは一度だけ表示されます。必ずコピーして安全な場所に保存してください。</p>
+                    <div class="api-key-display" id="apiKeyDisplay"></div>
+                    <button class="btn btn-secondary mt-2" onclick="copyKey()">コピー</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
+    <script>
+        feather.replace();
+        
+        async function createKey() {
+            const form = document.getElementById('createForm');
+            const formData = new FormData(form);
+            const data = {
+                site_name: formData.get('site_name'),
+                description: formData.get('description') || null,
+                expires_days: formData.get('expires_days') ? parseInt(formData.get('expires_days')) : null
+            };
+            
+            try {
+                const response = await fetch('/admin/api-keys/create', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('apiKeyDisplay').textContent = result.api_key;
+                    const createModal = bootstrap.Modal.getInstance(document.getElementById('createModal'));
+                    createModal.hide();
+                    const keyModal = new bootstrap.Modal(document.getElementById('keyModal'));
+                    keyModal.show();
+                    form.reset();
+                    setTimeout(() => location.reload(), 3000);
+                } else {
+                    alert('APIキーの作成に失敗しました');
+                }
+            } catch (error) {
+                alert('エラー: ' + error.message);
+            }
+        }
+        
+        async function toggleKey(id) {
+            if (!confirm('APIキーの状態を変更しますか？')) return;
+            
+            try {
+                const response = await fetch(`/admin/api-keys/${id}/toggle`, {method: 'POST'});
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('操作に失敗しました');
+                }
+            } catch (error) {
+                alert('エラー: ' + error.message);
+            }
+        }
+        
+        async function deleteKey(id) {
+            if (!confirm('このAPIキーを削除しますか？')) return;
+            
+            try {
+                const response = await fetch(`/admin/api-keys/${id}`, {method: 'DELETE'});
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('削除に失敗しました');
+                }
+            } catch (error) {
+                alert('エラー: ' + error.message);
+            }
+        }
+        
+        function copyKey() {
+            const key = document.getElementById('apiKeyDisplay').textContent;
+            navigator.clipboard.writeText(key);
+            alert('APIキーをコピーしました');
+        }
+    </script>
+</body>
+</html>
+

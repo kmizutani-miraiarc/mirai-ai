@@ -1,0 +1,52 @@
+{
+  "purchase_exit_strategy": {
+    "property_name": "exit_strategy",
+    "property_label": "出口戦略",
+    "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: CF, 1: 減価償却"
+  },
+  "purchase_follow_up": {
+    "property_name": "follow_up",
+    "property_label": "追客余地",
+    "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: はい, 1: いいえ"
+  },
+  "purchase_deal_hold": {
+    "property_name": "deal_hold",
+    "property_label": "保留",
+    "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 保留中"
+  },
+  "purchase_deal_non_applicable": {
+    "property_name": "deal_non_applicable",
+    "property_label": "非該当物件",
+    "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: はい, 1: いいえ"
+  },
+  "purchase_acquisition_channel": {
+    "property_name": "acquisition_channel",
+    "property_label": "獲得チャネル",
+    "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 自己客, 1: アウトバウンド"
+  },
+  "purchase_research_ng_reason": {
+    "property_name": "research_ng_reason",
+    "property_label": "NG理由",
+    "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 金額負け(他決), 1: 売主都合の売止, 2: 遵法性違反(瑕疵含む), 3: 銀行評価NG, 4: 売主金額合意NG"
+  },
+  "purchase_possession": {
+    "property_name": "possession",
+    "property_label": "中長期保有の可能性",
+    "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: はい, 1: いいえ"
+  },
+  "sales_sales_ng_reason": {
+    "property_name": "sales_ng_reason",
+    "property_label": "NG理由（販売）",
+    "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 他決, 1: 利回り, 2: ブレイク, 3: 築年, 4: 駅距離, 5: エリア, 6: 銀行評価, 7: 構造, 8: 稼働率, 9: 特記事項, 10: その他, 11: 応答なし"
+  },
+  "sales_research_ng_reason": {
+    "property_name": "research_ng_reason",
+    "property_label": "NG理由",
+    "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 金額負け(他決), 1: 売主都合の売止, 2: 遵法性違反(瑕疵含む), 3: 銀行評価NG, 4: 売主金額合意NG"
+  },
+  "sales_purchase_conditions": {
+    "property_name": "purchase_conditions",
+    "property_label": "買取条件",
+    "comment": "JSON配列形式で選択値IDを保存。選択値IDとラベルの対応は property_option_values テーブルを参照。選択値: 0: 現況, 1: 空渡し, 2: 更地渡し, 3: その他"
+  }
+}
