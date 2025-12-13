@@ -5,8 +5,9 @@ import os
 import logging
 import ollama
 import re
-from typing import Dict, Any, List, Optional
-from datetime import datetime
+import asyncio
+from typing import Dict, Any, List, Optional, AsyncGenerator
+from datetime import datetime, timedelta
 from src.database.connection import DatabaseConnection
 from src.chat.database_analyzer import DatabaseAnalyzer
 
@@ -26,56 +27,45 @@ class ChatService:
     _schema_cache: Optional[str] = None
     _schema_cache_lock = False
     
+    # 担当者情報のキャッシュ（名前 → owner_id のマッピング）
+    _owner_name_cache: Dict[str, int] = {}
+    _owner_cache_timestamp: Optional[datetime] = None
+    _owner_cache_ttl: timedelta = timedelta(hours=1)  # 1時間でキャッシュを無効化
+    
     def __init__(self):
         self.ollama_host = os.getenv('OLLAMA_BASE_URL', 'http://ollama:11434')
         self.model = os.getenv('OLLAMA_MODEL', 'mirai-qwen')
-        self.timeout = int(os.getenv('OLLAMA_TIMEOUT', '300'))  # デフォルト5分
-        try:
-            # Ollamaクライアントの初期化（タイムアウト設定はollamaライブラリが自動的に処理）
-            self.client = ollama.Client(host=self.ollama_host, timeout=self.timeout)
-            logger.info(f"ChatService初期化: ollama_host={self.ollama_host}, model={self.model}, timeout={self.timeout}s")
-        except Exception as e:
-            logger.error(f"Ollamaクライアント初期化エラー: {str(e)}")
-            raise
+        self.client = ollama.Client(host=self.ollama_host, timeout=300)
+        logger.info(f"ChatService初期化: ollama_host={self.ollama_host}, model={self.model}, timeout=300s")
         
-        # ベクトルDBを初期化（オプション機能）
+        # ベクトルDBの初期化（オプション）
         self.vector_store = None
-        if VectorStore:
-            try:
+        try:
+            chroma_host = os.getenv('CHROMA_HOST', 'chroma')
+            chroma_port = int(os.getenv('CHROMA_PORT', '8000'))
+            if VectorStore:
                 self.vector_store = VectorStore()
-                logger.info("VectorStoreを初期化しました")
-            except Exception as e:
-                logger.warning(f"VectorStore初期化に失敗しました（オプション機能）: {str(e)}")
-                self.vector_store = None
+                if self.vector_store.client:
+                    logger.info("VectorStoreを初期化しました")
+        except Exception as e:
+            logger.warning(f"VectorStoreの初期化に失敗（オプション機能）: {str(e)}")
     
-    @classmethod
-    async def load_database_schema(cls):
-        """
-        データベーススキーマをロードしてキャッシュする（起動時に1回実行）
-        """
-        if cls._schema_cache is None and not cls._schema_cache_lock:
-            cls._schema_cache_lock = True
-            try:
-                logger.info("データベーススキーマ情報をロード中...")
-                cls._schema_cache = await DatabaseAnalyzer.get_detailed_database_schema()
-                logger.info("データベーススキーマ情報のロードが完了しました")
-            except Exception as e:
-                logger.error(f"スキーマロードエラー: {str(e)}", exc_info=True)
-                cls._schema_cache = "スキーマ情報の取得に失敗しました"
-            finally:
-                cls._schema_cache_lock = False
+    @staticmethod
+    async def load_database_schema():
+        """データベーススキーマ情報をロードしてキャッシュに保存"""
+        logger.info("データベーススキーマ情報をロード中...")
+        try:
+            schema_info = await DatabaseAnalyzer.get_detailed_database_schema()
+            ChatService._schema_cache = schema_info
+            logger.info("データベーススキーマ情報のロードが完了しました")
+        except Exception as e:
+            logger.error(f"データベーススキーマ情報のロードに失敗: {str(e)}")
+            ChatService._schema_cache = "スキーマ情報がロードできませんでした"
     
-    @classmethod
-    def get_cached_schema(cls) -> str:
-        """
-        キャッシュされたスキーマ情報を取得
-        
-        Returns:
-            スキーマ情報文字列
-        """
-        if cls._schema_cache is None:
-            return "スキーマ情報がまだロードされていません"
-        return cls._schema_cache
+    @staticmethod
+    def get_cached_schema() -> str:
+        """キャッシュされたスキーマ情報を取得"""
+        return ChatService._schema_cache or "スキーマ情報がまだロードされていません"
     
     async def create_session(
         self,
@@ -125,22 +115,10 @@ class ChatService:
                         """,
                         (user_id,)
                     )
-                sessions = await cursor.fetchall()
-                # DictCursorを使用しているため、辞書形式で返される
-                # 日時オブジェクトはJSONシリアライズ可能な形式に変換
-                result = []
-                for session in sessions:
-                    session_dict = dict(session)
-                    # 日時を文字列に変換
-                    if 'created_at' in session_dict and session_dict['created_at']:
-                        session_dict['created_at'] = session_dict['created_at'].isoformat() if hasattr(session_dict['created_at'], 'isoformat') else str(session_dict['created_at'])
-                    if 'updated_at' in session_dict and session_dict['updated_at']:
-                        session_dict['updated_at'] = session_dict['updated_at'].isoformat() if hasattr(session_dict['updated_at'], 'isoformat') else str(session_dict['updated_at'])
-                    result.append(session_dict)
-                return result
+                return await cursor.fetchall()
         except Exception as e:
-            logger.error(f"チャットセッション一覧取得エラー: {str(e)}", exc_info=True)
-            raise
+            logger.error(f"チャットセッション取得エラー: {str(e)}")
+            return []
     
     async def get_messages(self, session_id: int) -> List[Dict[str, Any]]:
         """チャットメッセージ一覧を取得"""
@@ -155,19 +133,17 @@ class ChatService:
                     (session_id,)
                 )
                 messages = await cursor.fetchall()
-                # DictCursorを使用しているため、辞書形式で返される
-                # 日時オブジェクトはJSONシリアライズ可能な形式に変換
-                result = []
-                for msg in messages:
-                    msg_dict = dict(msg)
-                    # 日時を文字列に変換
-                    if 'created_at' in msg_dict and msg_dict['created_at']:
-                        msg_dict['created_at'] = msg_dict['created_at'].isoformat() if hasattr(msg_dict['created_at'], 'isoformat') else str(msg_dict['created_at'])
-                    result.append(msg_dict)
-                return result
+                logger.info(f"メッセージ取得: session_id={session_id}, count={len(messages)}")
+                # デバッグ: 最初のメッセージと最後のメッセージの内容をログに記録
+                if messages:
+                    first_msg = messages[0]
+                    last_msg = messages[-1]
+                    logger.info(f"最初のメッセージ: role={first_msg.get('role')}, content_length={len(first_msg.get('content', ''))}")
+                    logger.info(f"最後のメッセージ: role={last_msg.get('role')}, content_length={len(last_msg.get('content', ''))}")
+                return messages
         except Exception as e:
             logger.error(f"チャットメッセージ取得エラー: {str(e)}")
-            raise
+            return []
     
     async def save_message(
         self,
@@ -186,17 +162,23 @@ class ChatService:
                     (session_id, role, content)
                 )
                 await conn.commit()
+                message_id = cursor.lastrowid
+                logger.info(f"メッセージを保存: session_id={session_id}, message_id={message_id}, role={role}, content_length={len(content)}")
                 
-                # セッションの更新日時を更新
+                # セッションのupdated_atを更新
                 await cursor.execute(
-                    "UPDATE chat_sessions SET updated_at = NOW() WHERE id = %s",
+                    """
+                    UPDATE chat_sessions
+                    SET updated_at = NOW()
+                    WHERE id = %s
+                    """,
                     (session_id,)
                 )
                 await conn.commit()
                 
-                return cursor.lastrowid
+                return message_id
         except Exception as e:
-            logger.error(f"チャットメッセージ保存エラー: {str(e)}")
+            logger.error(f"チャットメッセージ保存エラー: {str(e)}", exc_info=True)
             raise
     
     async def send_message(
@@ -214,10 +196,11 @@ class ChatService:
                 title = message[:50] + "..." if len(message) > 50 else message
                 session_id = await self.create_session(user_id, owner_id, title)
             
-            # ユーザーメッセージを保存
+            # ユーザーメッセージを保存（履歴として保存）
             await self.save_message(session_id, 'user', message)
             
-            # 過去のメッセージを取得（コンテキストとして使用）
+            # 過去のメッセージを取得（履歴は保存するが、AI応答生成時には参照しない）
+            # 注: 履歴はMySQLとベクトルDBに保存されるが、AI応答生成時のコンテキストには含めない
             messages = await self.get_messages(session_id)
             
             # SQLクエリの実行は無効化（ベクトルDBのみ使用）
@@ -227,67 +210,70 @@ class ChatService:
             # システムプロンプトを構築（初回メッセージの場合）
             system_prompt = self._build_system_prompt()
             
-            # ベクトルDBから類似メッセージを検索（過去の会話を参考に）
+            # ベクトルDBから関連情報を並列検索（過去の会話を参考に）
+            # データベース関連のキーワードがある場合のみ検索を実行
             similar_context = ""
-            if self.vector_store:
+            similar_db_info = []
+            similar_business_data = []
+            
+            should_search_vector_db = self._should_search_vector_db(message)
+            
+            if self.vector_store and should_search_vector_db:
                 try:
-                    similar_messages = self.vector_store.search_similar_messages(message, limit=3)
+                    # 3つの検索を並列実行（asyncio.to_thread()でラップ）
+                    # 同期メソッドをasyncio.to_thread()でラップして並列実行
+                    results = await asyncio.gather(
+                        asyncio.to_thread(lambda: self.vector_store.search_similar_messages(message, limit=3)),
+                        asyncio.to_thread(lambda: self.vector_store.search_similar_database_info(message, limit=2)),
+                        asyncio.to_thread(lambda: self.vector_store.search_business_data(message, limit=10)),
+                        return_exceptions=True
+                    )
+                    
+                    similar_messages, similar_db_info, similar_business_data = results
+                    
+                    # エラーハンドリング
+                    if isinstance(similar_messages, Exception):
+                        logger.warning(f"類似メッセージ検索に失敗: {str(similar_messages)}")
+                        similar_messages = []
+                    if isinstance(similar_db_info, Exception):
+                        logger.warning(f"スキーマ情報検索に失敗: {str(similar_db_info)}")
+                        similar_db_info = []
+                    if isinstance(similar_business_data, Exception):
+                        logger.warning(f"ビジネスデータ検索に失敗: {str(similar_business_data)}")
+                        similar_business_data = []
+                    
+                    # 類似メッセージのコンテキストを構築
                     if similar_messages:
                         similar_context = "\n【過去の類似会話】\n"
                         for msg in similar_messages:
                             similar_context += f"- {msg['role']}: {msg['content'][:200]}...\n"
                 except Exception as e:
-                    logger.warning(f"類似メッセージ検索に失敗: {str(e)}")
+                    logger.warning(f"ベクトルDB検索に失敗: {str(e)}")
             
             # ベクトルDBから関連するデータベース情報を検索（MySQLから直接取得しない）
             db_context = ""
-            if self.vector_store:
+            if self.vector_store and should_search_vector_db:
                 try:
-                    # スキーマ情報を検索
-                    similar_db_info = self.vector_store.search_similar_database_info(message, limit=2)
                     
                     # 件数を聞く質問かどうかを判定（「何件」「いくつ」「数」などのキーワード）
-                    is_count_query = any(keyword in message for keyword in ['何件', 'いくつ', '数', '件数', 'カウント', '件ありますか'])
+                    # 現在のメッセージのみを対象に判定（過去の会話履歴は除外）
+                    current_message_only = message
+                    is_count_query = any(keyword in current_message_only for keyword in ['何件', 'いくつ', '数', '件数', 'カウント', '件ありますか'])
                     
                     if is_count_query:
                         # 件数を聞く質問の場合、メタデータで直接カウント
-                        # 担当者名からowner_idを特定する処理を追加
-                        owner_name_to_id = {}
+                        # 担当者名からowner_idを特定する処理を追加（キャッシュ使用）
+                        owner_name_to_id = self._get_owner_name_to_id_cache()
                         
-                        # 担当者情報からowner_idと名前のマッピングを取得
-                        if self.vector_store.business_data_collection:
-                            try:
-                                owner_results = self.vector_store.business_data_collection.get(
-                                    where={'type': 'owner'},
-                                    limit=100
-                                )
-                                if owner_results.get('documents'):
-                                    for i, doc in enumerate(owner_results['documents']):
-                                        metadata = owner_results['metadatas'][i] if owner_results.get('metadatas') else {}
-                                        owner_id = metadata.get('id')
-                                        # ドキュメントから名前を抽出（「名前: 名 姓」の形式から抽出）
-                                        if owner_id and doc and '名前:' in doc:
-                                            name_line = doc.split('名前:')[1].split('\\n')[0].strip()
-                                            # 名と姓を分割（HubSpotの形式: firstname lastname）
-                                            name_parts = name_line.split()
-                                            if len(name_parts) >= 2:
-                                                first_name = name_parts[0]  # 名
-                                                last_name = name_parts[1]  # 姓
-                                                # 姓で検出（「岩崎さん」など）
-                                                owner_name_to_id[last_name] = owner_id
-                                                # 名で検出（「陽さん」など）
-                                                if first_name:
-                                                    owner_name_to_id[first_name] = owner_id
-                                            elif len(name_parts) == 1:
-                                                # 名前が1つの場合
-                                                owner_name_to_id[name_parts[0]] = owner_id
-                            except Exception as e:
-                                logger.warning(f"担当者情報の取得に失敗: {str(e)}")
-                        
-                        # 質問に含まれる担当者名に基づいてカウント
+                        # 質問に含まれる担当者名に基づいてカウント（現在のメッセージのみ）
                         count_info_parts = []
+                        import re
                         for name, owner_id in owner_name_to_id.items():
-                            if name in message:
+                            # 担当者名を単語単位で検出（部分文字列マッチを避ける）
+                            # 現在のメッセージのみを対象に検出（過去の会話履歴は除外）
+                            # 例：「岩崎」は「岩崎さん」「岩崎が」などは検出するが、「行動パターン」の中の「岩崎」は検出しない
+                            name_pattern = re.compile(rf'\b{re.escape(name)}\b|{re.escape(name)}さん|{re.escape(name)}が|{re.escape(name)}の|{re.escape(name)}は|{re.escape(name)}を|{re.escape(name)}に|{re.escape(name)}で')
+                            if name_pattern.search(current_message_only):
                                 # 質問に含まれるデータタイプに応じてカウント
                                 data_type_keywords = {
                                     'コンタクト': ('contact', 'コンタクト数', None),
@@ -300,10 +286,10 @@ class ChatService:
                                     '会社': ('company', '会社数', None),
                                 }
                                 
-                                # 質問に含まれるデータタイプを検出
+                                # 質問に含まれるデータタイプを検出（現在のメッセージのみ）
                                 detected_types = []
                                 for keyword, (type_filter, label, text_filter) in data_type_keywords.items():
-                                    if keyword in message:
+                                    if keyword in current_message_only:
                                         detected_types.append((type_filter, label, text_filter))
                                 
                                 # データタイプが検出されない場合は、デフォルトでコンタクト数をカウント
@@ -319,8 +305,8 @@ class ChatService:
                                     )
                                     count_info_parts.append(f"{name}さんが担当する{label}: {count:,}件")
                                     
-                                    # 「契約まで至った」「契約した」などのキーワードが含まれている場合
-                                    if type_filter == 'deal_sales' and any(kw in message for kw in ['契約まで', '契約した', '契約日', '契約済み', '契約完了']):
+                                    # 「契約まで至った」「契約した」などのキーワードが含まれている場合（現在のメッセージのみ）
+                                    if type_filter == 'deal_sales' and any(kw in current_message_only for kw in ['契約まで', '契約した', '契約日', '契約済み', '契約完了']):
                                         contract_count = self.vector_store.count_business_data_with_text_filter(
                                             type_filter=type_filter,
                                             owner_id=owner_id,
@@ -329,11 +315,16 @@ class ChatService:
                                         count_info_parts.append(f"{name}さんが担当する契約まで至った販売取引数: {contract_count:,}件")
                         
                         if count_info_parts:
-                            db_context = "\n【データ件数情報】\n"
-                            db_context += "\n".join(count_info_parts) + "\n\n"
+                            # 件数情報を最初に配置し、強調する
+                            db_context = "\n" + "=" * 80 + "\n"
+                            db_context += "【重要：データ件数情報】\n"
+                            db_context += "以下の件数は、ベクトルDB全体から正確に集計された数値です。\n"
+                            db_context += "この数値を必ず使用してください。他のデータから数えたり推測したりしないでください。\n"
+                            db_context += "=" * 80 + "\n"
+                            db_context += "\n".join(count_info_parts) + "\n"
+                            db_context += "=" * 80 + "\n\n"
                     
-                    # ビジネスデータ（実際のデータ）を検索（より多くのデータを検索）
-                    similar_business_data = self.vector_store.search_business_data(message, limit=10)
+                    # similar_business_dataは既に並列検索で取得済み
                     
                     if similar_db_info or similar_business_data or db_context:
                         if not db_context:
@@ -347,8 +338,13 @@ class ChatService:
                                 db_context += f"{info['content'][:300]}...\n\n"
                         
                         # ビジネスデータを追加（完全な内容を表示）
+                        # ただし、件数情報が提供されている場合は、サンプルデータであることを明記
                         if similar_business_data:
-                            db_context += "【関連するデータ】\n"
+                            if count_info_parts:
+                                db_context += "\n【注意：以下のデータはサンプルです】\n"
+                                db_context += "件数は上記の【データ件数情報】セクションに記載された数値を使用してください。\n"
+                                db_context += "以下のサンプルデータから件数を数えないでください。\n"
+                            db_context += "【関連するデータ（サンプル）】\n"
                             for data in similar_business_data:
                                 # 完全な内容を表示（切り詰めない）
                                 db_context += f"{data['content']}\n\n"
@@ -363,7 +359,7 @@ class ChatService:
                 context_parts.append(db_context)
             
             if context_parts:
-                message_with_data = f"{message}\n\n" + "\n".join(context_parts) + "\n\n**重要**: 上記のベクトルDBからの情報のみを使用して質問に答えてください。SQLクエリは一切生成しないでください。データベースへの直接アクセスは一切行わないでください。"
+                message_with_data = f"{message}\n\n" + "\n".join(context_parts) + "\n\n**重要**: 上記のベクトルDBからの情報のみを使用して質問に答えてください。SQLクエリは一切生成しないでください。データベースへの直接アクセスは一切行わないでください。\n\n**注意**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリングやグループ化をしないでください。例えば「コンタクトの行動パターン」という質問では、全コンタクトを対象に分析し、担当者別に分割しないでください。"
             else:
                 message_with_data = message_with_query
             
@@ -372,38 +368,71 @@ class ChatService:
             
             # システムプロンプトを追加（初回メッセージの場合のみ）
             if len(messages) == 1:  # ユーザーメッセージ1件のみ
-                ollama_messages.append({
-                    'role': 'system',
-                    'content': system_prompt
-                })
+                # 挨拶や短いメッセージの場合は、システムプロンプトを簡潔版にする
+                if not should_search_vector_db:
+                    # 簡潔版のシステムプロンプト
+                    short_prompt = """あなたは不動産取引データ分析の専門家です。
+- 必ず日本語のみで回答してください
+- 丁寧で自然な日本語で応答してください"""
+                    ollama_messages.append({
+                        'role': 'system',
+                        'content': short_prompt
+                    })
+                    logger.info(f"簡潔版システムプロンプトを使用（挨拶/短いメッセージ）")
+                else:
+                    # フル版のシステムプロンプト（データベース関連の質問の場合）
+                    ollama_messages.append({
+                        'role': 'system',
+                        'content': system_prompt
+                    })
+                    logger.info(f"フル版システムプロンプトを使用（データベース関連の質問）")
             
-            # 過去のメッセージを追加
-            for msg in messages[:-1]:  # 最後のメッセージ以外
-                ollama_messages.append({
-                    'role': msg['role'],
-                    'content': msg['content']
-                })
+            # 過去のメッセージは参照しない（履歴は保存されるが、AI応答生成時には使用しない）
+            # for msg in messages[:-1]:  # 最後のメッセージ以外
+            #     ollama_messages.append({
+            #         'role': msg['role'],
+            #         'content': msg['content']
+            #     })
             
             # 現在のメッセージを追加（ベクトルDBからのデータを含む）
             # 日本語のみで回答することを強調
             final_message = message_with_data
             if context_parts:
-                final_message += "\n\n**重要**: 必ず日本語のみで回答してください。英語や中国語は使用しないでください。SQLクエリは一切生成しないでください。"
+                if "【重要：データ件数情報】" in message_with_data or "【データ件数情報】" in message_with_data:
+                    final_message += "\n\n**最重要**: メッセージに「【重要：データ件数情報】」または「【データ件数情報】」セクションが含まれている場合、必ずそのセクションに記載された件数をそのまま使用してください。他のデータセクション（【関連するデータ】など）から件数を数えたり推測したりしないでください。"
+                final_message += "\n\n**重要**: 必ず日本語のみで回答してください。英語や中国語は使用しないでください。SQLクエリは一切生成しないでください。\n\n**注意**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリングやグループ化をしないでください。例えば「コンタクトの行動パターン」という質問では、全コンタクトを対象に分析し、担当者別に分割しないでください。"
             ollama_messages.append({
                 'role': 'user',
                 'content': final_message
             })
             
-            # AIから応答を取得
+            # AIから応答を取得（ストリーミング対応）
             try:
-                logger.info(f"Ollama API呼び出し開始: host={self.ollama_host}, model={self.model}")
-                response = self.client.chat(
+                import time
+                start_time = time.time()
+                logger.info(f"Ollama API呼び出し開始（ストリーミング）: host={self.ollama_host}, model={self.model}, should_search_vector_db={should_search_vector_db}, message_length={len(message)}, ollama_messages_count={len(ollama_messages)}, total_chars={sum(len(m.get('content', '')) for m in ollama_messages)}")
+                ai_response = ""
+                stream_response = self.client.chat(
                     model=self.model,
-                    messages=ollama_messages
+                    messages=ollama_messages,
+                    stream=True
                 )
-                ai_response = response.get('message', {}).get('content', '')
+                
+                # ストリーミングレスポンスを処理
+                first_chunk_time = None
+                for chunk in stream_response:
+                    if first_chunk_time is None:
+                        first_chunk_time = time.time()
+                        elapsed = first_chunk_time - start_time
+                        logger.info(f"Ollama API最初のチャンク受信: {elapsed:.2f}秒経過")
+                    if chunk.get('message') and chunk['message'].get('content'):
+                        ai_response += chunk['message']['content']
+                
+                total_time = time.time() - start_time
+                logger.info(f"Ollama API応答完了: 総時間={total_time:.2f}秒, 応答文字数={len(ai_response)}")
+                
                 if not ai_response:
-                    logger.warning(f"Ollama APIからの応答が空です: {response}")
+                    logger.warning(f"Ollama APIからの応答が空です")
                     ai_response = '応答を取得できませんでした。'
                 
                 # AIの応答から不要なコードブロックや説明を除去
@@ -466,45 +495,51 @@ class ChatService:
 {query_summary}
 
 この結果を分析して、ユーザーの質問に対する具体的な回答を提供してください。数値や統計情報を明確に示し、ビジネス的な洞察を含めてください。
-
-**重要**: SQLクエリ自体は表示せず、分析結果のみを返してください。"""
+SQLクエリは表示しないでください。分析結果のみを返してください。"""
                             
-                            analysis_messages_final = ollama_messages + [
-                                {
-                                    'role': 'user',
-                                    'content': f"{message}\n\n【データ】\n{query_summary}\n\nこのデータを分析して、質問に対する具体的な回答を提供してください。\n\n**重要**: \n- SQLクエリは表示せず、分析結果のみを返してください\n- PythonコードやPostgreSQLの例は一切含めないでください\n- 「実行例」などの説明文は不要です\n- 分析結果のみを簡潔に返してください"
-                                }
-                            ]
-                            
-                            analysis_response = self.client.chat(
+                            reanalysis_response = self.client.chat(
                                 model=self.model,
-                                messages=analysis_messages_final
+                                messages=analysis_messages
                             )
-                            # クエリ部分を除去して、分析結果のみを返す
-                            analysis_content = analysis_response.get('message', {}).get('content', '')
-                            # 不要なコードブロックや説明文を除去
-                            ai_response = self._clean_ai_response(analysis_content)
-                            # SQLクエリコードブロックを除去
-                            ai_response = re.sub(r'```sql.*?```', '', ai_response, flags=re.DOTALL | re.IGNORECASE)
-                            # SELECTで始まる行も除去
-                            lines = ai_response.split('\n')
-                            filtered_lines = []
-                            skip_until_newline = False
-                            for line in lines:
-                                stripped = line.strip()
-                                if stripped.upper().startswith('SELECT'):
-                                    skip_until_newline = True
-                                    continue
-                                if skip_until_newline and not stripped:
-                                    skip_until_newline = False
-                                    continue
-                                if not skip_until_newline:
+                            reanalysis_content = reanalysis_response.get('message', {}).get('content', '')
+                            
+                            # クエリ部分を除去してから保存
+                            if reanalysis_content:
+                                # SQLクエリブロックを除去
+                                lines = reanalysis_content.split('\n')
+                                filtered_lines = []
+                                skip_until_next_section = False
+                                for line in lines:
+                                    if '```sql' in line or '```' in line and 'sql' in line.lower():
+                                        skip_until_next_section = True
+                                        continue
+                                    if skip_until_next_section and '```' in line:
+                                        skip_until_next_section = False
+                                        continue
+                                    if not skip_until_next_section:
+                                        # SQL関連のキーワードが含まれる行もスキップ
+                                        if any(keyword in line for keyword in [
+                                            'SELECT', 'FROM', 'WHERE', 'JOIN', 'GROUP BY', 'ORDER BY',
+                                            '実行例', 'PostgreSQL', 'SQLAlchemy', 'create_engine'
+                                        ]):
+                                            continue
+                                    
+                                    # 通常の行を追加
                                     filtered_lines.append(line)
-                            ai_response = '\n'.join(filtered_lines).strip()
-                            if not ai_response:
-                                # クエリ除去後に空になった場合、簡潔なメッセージを返す
-                                ai_response = "分析結果を準備中です。"
-                            logger.info("AIがクエリ結果を分析しました（クエリは非表示）")
+                                
+                                response = '\n'.join(filtered_lines)
+                                
+                                # 複数の空行を1つに
+                                response = re.sub(r'\n\s*\n\s*\n+', '\n\n', response)
+                                
+                                # 改行を適切に追加して読みやすくする
+                                response = self._format_response_with_line_breaks(response)
+                                
+                                ai_response = response.strip()
+                                if not ai_response:
+                                    # クエリ除去後に空になった場合、簡潔なメッセージを返す
+                                    ai_response = "分析結果を準備中です。"
+                                logger.info("AIがクエリ結果を分析しました（クエリは非表示）")
                         except Exception as e:
                             logger.error(f"再分析エラー: {str(e)}", exc_info=True)
                             # エラーが発生しても、元の応答からクエリ部分を除去
@@ -518,14 +553,15 @@ class ChatService:
                         logger.warning(f"SQLクエリ実行エラー: {error_msg}")
             except Exception as e:
                 logger.error(f"Ollama API呼び出しエラー (chat): {str(e)}", exc_info=True)
-                # フォールバック: generate APIを使用
+                # フォールバック: generate APIを使用（ストリーミングなし）
                 try:
                     # 最後のユーザーメッセージのみを使用
                     last_user_message = ollama_messages[-1]['content'] if ollama_messages else message
                     logger.info(f"Ollama generate APIを試行: model={self.model}")
                     response = self.client.generate(
                         model=self.model,
-                        prompt=last_user_message
+                        prompt=last_user_message,
+                        stream=False
                     )
                     ai_response = response.get('response', 'エラーが発生しました。もう一度お試しください。')
                 except Exception as e2:
@@ -566,6 +602,268 @@ class ChatService:
             logger.error(f"チャット送信エラー: {str(e)}")
             raise
     
+    async def _prepare_session(
+        self,
+        user_id: int,
+        message: str,
+        session_id: Optional[int] = None,
+        owner_id: Optional[int] = None
+    ) -> int:
+        """セッションを準備してIDを返す"""
+        if not session_id:
+            title = message[:50] + "..." if len(message) > 50 else message
+            session_id = await self.create_session(user_id, owner_id, title)
+            logger.info(f"新規セッション作成: session_id={session_id}, user_id={user_id}")
+        # ユーザーメッセージを保存
+        user_message_id = await self.save_message(session_id, 'user', message)
+        logger.info(f"ユーザーメッセージ保存完了: session_id={session_id}, message_id={user_message_id}")
+        return session_id
+    
+    async def send_message_stream(
+        self,
+        user_id: int,
+        message: str,
+        session_id: int,
+        owner_id: Optional[int] = None
+    ):
+        """メッセージを送信してAIからストリーミング応答を取得"""
+        
+        try:
+            # 過去のメッセージを取得（履歴は保存するが、AI応答生成時には参照しない）
+            # 注: 履歴はMySQLとベクトルDBに保存されるが、AI応答生成時のコンテキストには含めない
+            messages = await self.get_messages(session_id)
+            logger.info(f"過去のメッセージ取得（参照しない）: session_id={session_id}, messages_count={len(messages)}")
+            
+            # システムプロンプトを構築（初回メッセージの場合）
+            system_prompt = self._build_system_prompt()
+            
+            # ベクトルDBから関連情報を並列検索
+            # データベース関連のキーワードがある場合のみ検索を実行
+            similar_context = ""
+            similar_db_info = []
+            similar_business_data = []
+            
+            should_search_vector_db = self._should_search_vector_db(message)
+            logger.info(f"ベクトルDB検索判定（ストリーミング）: message='{message[:50]}...', should_search={should_search_vector_db}")
+            
+            if self.vector_store and should_search_vector_db:
+                try:
+                    results = await asyncio.gather(
+                        asyncio.to_thread(lambda: self.vector_store.search_similar_messages(message, limit=3)),
+                        asyncio.to_thread(lambda: self.vector_store.search_similar_database_info(message, limit=2)),
+                        asyncio.to_thread(lambda: self.vector_store.search_business_data(message, limit=10)),
+                        return_exceptions=True
+                    )
+                    
+                    similar_messages, similar_db_info, similar_business_data = results
+                    
+                    if isinstance(similar_messages, Exception):
+                        logger.warning(f"類似メッセージ検索に失敗: {str(similar_messages)}")
+                        similar_messages = []
+                    if isinstance(similar_db_info, Exception):
+                        logger.warning(f"スキーマ情報検索に失敗: {str(similar_db_info)}")
+                        similar_db_info = []
+                    if isinstance(similar_business_data, Exception):
+                        logger.warning(f"ビジネスデータ検索に失敗: {str(similar_business_data)}")
+                        similar_business_data = []
+                    
+                    if similar_messages:
+                        similar_context = "\n【過去の類似会話】\n"
+                        for msg in similar_messages:
+                            similar_context += f"- {msg['role']}: {msg['content'][:200]}...\n"
+                except Exception as e:
+                    logger.warning(f"ベクトルDB検索に失敗: {str(e)}")
+            
+            # コンテキストを構築（send_messageと同じロジック）
+            # 注意: 現在のメッセージのみを使用して検索し、過去の会話履歴の影響を排除
+            db_context = ""
+            if self.vector_store and should_search_vector_db:
+                try:
+                    # 現在のメッセージのみを対象に判定（過去の会話履歴は除外）
+                    current_message_only = message
+                    is_count_query = any(keyword in current_message_only for keyword in ['何件', 'いくつ', '数', '件数', 'カウント', '件ありますか'])
+                    
+                    if is_count_query:
+                        owner_name_to_id = self._get_owner_name_to_id_cache()
+                        count_info_parts = []
+                        import re
+                        for name, owner_id_val in owner_name_to_id.items():
+                            # 担当者名を単語単位で検出（部分文字列マッチを避ける）
+                            # 現在のメッセージのみを対象に検出（過去の会話履歴は除外）
+                            # 例：「岩崎」は「岩崎さん」「岩崎が」などは検出するが、「行動パターン」の中の「岩崎」は検出しない
+                            name_pattern = re.compile(rf'\b{re.escape(name)}\b|{re.escape(name)}さん|{re.escape(name)}が|{re.escape(name)}の|{re.escape(name)}は|{re.escape(name)}を|{re.escape(name)}に|{re.escape(name)}で')
+                            if name_pattern.search(current_message_only):
+                                data_type_keywords = {
+                                    'コンタクト': ('contact', 'コンタクト数', None),
+                                    'contact': ('contact', 'コンタクト数', None),
+                                    '仕入取引': ('deal_purchase', '仕入取引数', None),
+                                    '仕入': ('deal_purchase', '仕入取引数', None),
+                                    '販売取引': ('deal_sales', '販売取引数', None),
+                                    '販売': ('deal_sales', '販売取引数', None),
+                                    '物件': ('property', '物件数', None),
+                                    '会社': ('company', '会社数', None),
+                                }
+                                
+                                detected_types = []
+                                for keyword, (type_filter, label, text_filter) in data_type_keywords.items():
+                                    # 現在のメッセージのみを対象に検出（過去の会話履歴は除外）
+                                    if keyword in current_message_only:
+                                        detected_types.append((type_filter, label, text_filter))
+                                
+                                if not detected_types:
+                                    detected_types = [('contact', 'コンタクト数', None)]
+                                
+                                for type_filter, label, text_filter in detected_types:
+                                    count = self.vector_store.count_business_data_by_metadata(
+                                        type_filter=type_filter,
+                                        owner_id=owner_id_val
+                                    )
+                                    count_info_parts.append(f"{name}さんが担当する{label}: {count:,}件")
+                        
+                        if count_info_parts:
+                            db_context = "\n" + "=" * 80 + "\n"
+                            db_context += "【重要：データ件数情報】\n"
+                            db_context += "以下の件数は、ベクトルDB全体から正確に集計された数値です。\n"
+                            db_context += "この数値を必ず使用してください。他のデータから数えたり推測したりしないでください。\n"
+                            db_context += "=" * 80 + "\n"
+                            db_context += "\n".join(count_info_parts) + "\n"
+                            db_context += "=" * 80 + "\n\n"
+                    
+                    if similar_db_info or similar_business_data or db_context:
+                        if not db_context:
+                            db_context = "\n【関連するデータベース情報】\n"
+                        
+                        if similar_db_info:
+                            if "【関連するデータベース情報】" not in db_context:
+                                db_context += "\n【関連するデータベース情報】\n"
+                            for info in similar_db_info:
+                                db_context += f"{info['content'][:300]}...\n\n"
+                        
+                        if similar_business_data:
+                            db_context += "【関連するデータ（サンプル）】\n"
+                            # デバッグ: 検索結果のowner_idをログに記録
+                            owner_ids_in_results = set(data.get('owner_id') for data in similar_business_data if data.get('owner_id'))
+                            if owner_ids_in_results:
+                                logger.info(f"ビジネスデータ検索結果に含まれるowner_id: {owner_ids_in_results}")
+                            for data in similar_business_data:
+                                db_context += f"{data['content']}\n\n"
+                except Exception as e:
+                    logger.warning(f"データベース情報検索に失敗: {str(e)}")
+            
+            # メッセージにコンテキストを追加
+            context_parts = []
+            if similar_context:
+                context_parts.append(similar_context)
+            if db_context:
+                context_parts.append(db_context)
+            
+            if context_parts:
+                message_with_data = f"{message}\n\n" + "\n".join(context_parts) + "\n\n**重要**: 上記のベクトルDBからの情報のみを使用して質問に答えてください。SQLクエリは一切生成しないでください。データベースへの直接アクセスは一切行わないでください。\n\n**注意**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリングやグループ化をしないでください。例えば「コンタクトの行動パターン」という質問では、全コンタクトを対象に分析し、担当者別に分割しないでください。"
+            else:
+                message_with_data = message
+            
+            # Ollama用のメッセージ形式に変換
+            ollama_messages = []
+            
+            if len(messages) == 1:
+                # 挨拶や短いメッセージの場合は、システムプロンプトを簡潔版にする
+                if not should_search_vector_db:
+                    # 簡潔版のシステムプロンプト
+                    short_prompt = """あなたは不動産取引データ分析の専門家です。
+- 必ず日本語のみで回答してください
+- 丁寧で自然な日本語で応答してください"""
+                    ollama_messages.append({
+                        'role': 'system',
+                        'content': short_prompt
+                    })
+                    logger.info(f"簡潔版システムプロンプトを使用（ストリーミング、挨拶/短いメッセージ）")
+                else:
+                    # フル版のシステムプロンプト（データベース関連の質問の場合）
+                    ollama_messages.append({
+                        'role': 'system',
+                        'content': system_prompt
+                    })
+                    logger.info(f"フル版システムプロンプトを使用（ストリーミング、データベース関連の質問）")
+            
+            # 過去のメッセージは参照しない（履歴は保存されるが、AI応答生成時には使用しない）
+            # for msg in messages[:-1]:
+            #     ollama_messages.append({
+            #         'role': msg['role'],
+            #         'content': msg['content']
+            #     })
+            
+            final_message = message_with_data
+            if context_parts:
+                if "【重要：データ件数情報】" in message_with_data or "【データ件数情報】" in message_with_data:
+                    final_message += "\n\n**最重要**: メッセージに「【重要：データ件数情報】」または「【データ件数情報】」セクションが含まれている場合、必ずそのセクションに記載された件数をそのまま使用してください。他のデータセクション（【関連するデータ】など）から件数を数えたり推測したりしないでください。"
+                final_message += "\n\n**重要**: 必ず日本語のみで回答してください。英語や中国語は使用しないでください。SQLクエリは一切生成しないでください。\n\n**注意**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリングやグループ化をしないでください。例えば「コンタクトの行動パターン」という質問では、全コンタクトを対象に分析し、担当者別に分割しないでください。"
+            
+            ollama_messages.append({
+                'role': 'user',
+                'content': final_message
+            })
+            
+            # AIからストリーミング応答を取得
+            try:
+                import time
+                start_time = time.time()
+                logger.info(f"Ollama API呼び出し開始（ストリーミング）: host={self.ollama_host}, model={self.model}, should_search_vector_db={should_search_vector_db}, message_length={len(message)}, ollama_messages_count={len(ollama_messages)}, total_chars={sum(len(m.get('content', '')) for m in ollama_messages)}")
+                stream_response = self.client.chat(
+                    model=self.model,
+                    messages=ollama_messages,
+                    stream=True
+                )
+                
+                ai_response = ""
+                first_chunk_time = None
+                # ストリーミングレスポンスをチャンクごとに送信
+                for chunk in stream_response:
+                    if first_chunk_time is None:
+                        first_chunk_time = time.time()
+                        elapsed = first_chunk_time - start_time
+                        logger.info(f"Ollama API最初のチャンク受信: {elapsed:.2f}秒経過")
+                    if chunk.get('message') and chunk['message'].get('content'):
+                        content = chunk['message']['content']
+                        ai_response += content
+                        yield {'type': 'chunk', 'content': content}
+                
+                total_time = time.time() - start_time
+                logger.info(f"Ollama API応答完了: 総時間={total_time:.2f}秒, 応答文字数={len(ai_response)}")
+                
+                if not ai_response:
+                    logger.warning(f"Ollama APIからの応答が空です")
+                    ai_response = '応答を取得できませんでした。'
+                    yield {'type': 'chunk', 'content': ai_response}
+                
+                # AI応答を保存（クリーンアップ済み）
+                ai_response_cleaned = self._clean_ai_response(ai_response)
+                # クリーンアップ後の内容が空でないことを確認
+                if not ai_response_cleaned or not ai_response_cleaned.strip():
+                    logger.warning(f"AI応答がクリーンアップ後に空になりました。元の応答を保存します。元の長さ: {len(ai_response)}")
+                    ai_response_cleaned = ai_response.strip() if ai_response else '応答がありませんでした。'
+                message_id = await self.save_message(session_id, 'assistant', ai_response_cleaned)
+                logger.info(f"AI応答を保存: session_id={session_id}, message_id={message_id}, content_length={len(ai_response_cleaned)}")
+                
+                # ベクトルDBにメッセージを追加（クリーンアップ済み）
+                # ユーザーメッセージとAI応答の両方を保存（履歴として残すため）
+                if self.vector_store:
+                    try:
+                        # ユーザーメッセージをベクトルDBに追加
+                        self.vector_store.add_chat_message(session_id, 'user', message)
+                        # AI応答をベクトルDBに追加
+                        self.vector_store.add_chat_message(session_id, 'assistant', ai_response_cleaned)
+                    except Exception as e:
+                        logger.warning(f"ベクトルDBへのメッセージ追加に失敗: {str(e)}")
+                
+            except Exception as e:
+                logger.error(f"Ollama API呼び出しエラー (stream): {str(e)}", exc_info=True)
+                error_msg = f'エラーが発生しました: {str(e)}。Ollamaサービスが起動しているか確認してください。'
+                yield {'type': 'error', 'error': error_msg}
+                
+        except Exception as e:
+            logger.error(f"ストリーミング送信エラー: {str(e)}")
+            yield {'type': 'error', 'error': str(e)}
+    
     def _extract_sql_query(self, message: str) -> Optional[str]:
         """
         メッセージからSQLクエリを抽出（ユーザーメッセージとAI応答の両方に対応）
@@ -583,114 +881,137 @@ class ChatService:
             sql = match.group(1).strip()
             # 末尾の空白や改行を削除
             sql = re.sub(r'\s+', ' ', sql).strip()
-            return sql if sql else None
+            return sql
         
-        # SELECTで始まる行をチェック（コードブロック内のみ）
+        # SELECTで始まる行をチェック（コードブロックなしの場合）
         lines = message.split('\n')
         sql_lines = []
-        in_code_block = False
         in_sql = False
-        
         for line in lines:
             stripped = line.strip()
-            
-            # コードブロックの開始を検出
-            if stripped.startswith('```'):
-                if 'sql' in stripped.lower() or not in_code_block:
-                    in_code_block = True
-                    in_sql = True
-                else:
-                    in_code_block = False
-                    in_sql = False
-                continue
-            
-            # コードブロック内でSELECT文を検出
-            if in_sql and in_code_block:
-                if stripped.upper().startswith('SELECT'):
-                    sql_lines.append(stripped)
-                elif sql_lines and (not stripped or not stripped.startswith('#')):
-                    if not stripped:
-                        sql_lines.append('')
-                    else:
-                        sql_lines.append(stripped)
-                elif sql_lines and stripped.startswith('```'):
-                    break
-            
-            # コードブロック外でSELECTで始まる行をチェック（簡易検出）
-            if not in_code_block and stripped.upper().startswith('SELECT'):
-                sql_lines = [stripped]
+            if stripped.upper().startswith('SELECT'):
                 in_sql = True
-            elif in_sql and not in_code_block:
-                if stripped and not stripped.startswith('#'):
+                sql_lines.append(stripped)
+            elif in_sql:
+                if stripped.upper().startswith(('FROM', 'WHERE', 'JOIN', 'GROUP', 'ORDER', 'LIMIT', 'HAVING')):
                     sql_lines.append(stripped)
-                elif not stripped:
-                    sql_lines.append('')
+                elif stripped and not stripped.startswith('--'):
+                    # SQLの続きの可能性
+                    sql_lines.append(stripped)
                 else:
+                    # SQLが終わったと判断
                     break
         
         if sql_lines:
-            sql = ' '.join(line for line in sql_lines if line.strip())
-            return sql.strip() if sql.strip() else None
+            sql = ' '.join(sql_lines)
+            return sql
         
         return None
     
-    def _clean_ai_response(self, response: str) -> str:
+    def _clean_ai_response(self, ai_response: str) -> str:
         """
-        AIの応答から不要なコードブロックや説明文を除去
+        AIの応答から不要なコードブロックや説明を除去
         
         Args:
-            response: AIの応答
+            ai_response: AIの応答
             
         Returns:
             クリーンアップされた応答
         """
-        # Pythonコードブロックを除去
-        response = re.sub(r'```python.*?```', '', response, flags=re.DOTALL | re.IGNORECASE)
+        if not ai_response:
+            return ai_response
         
-        # その他のコードブロック（sql以外）を除去
-        response = re.sub(r'```(?!sql)(?:[a-z]+)?\s*.*?```', '', response, flags=re.DOTALL | re.IGNORECASE)
-        
-        # 不要な説明文のセクションを除去
-        lines = response.split('\n')
+        # SQLクエリブロックを除去
+        lines = ai_response.split('\n')
         cleaned_lines = []
-        skip_section = False
+        skip_until_next_section = False
         
-        for i, line in enumerate(lines):
-            stripped = line.strip()
-            
-            # セクションヘッダーをチェック（スキップ開始）
-            if any(keyword in stripped for keyword in [
-                '実行例', '実行する場合', 'PostgreSQL', 'SQLAlchemy',
-                'create_engine', 'from sqlalchemy', 'DATABASE_URI',
-                '以下は', '以下が', '以下のような', '例:', '例：',
-                '完整的な', 'Python で実行', 'MySQL で実行'
-            ]):
-                skip_section = True
+        for line in lines:
+            # SQLコードブロックの開始を検出
+            if '```sql' in line or ('```' in line and 'sql' in line.lower()):
+                skip_until_next_section = True
                 continue
             
-            # セクション終了を検出（次の見出しまたは空行）
-            if skip_section:
-                if (not stripped or 
-                    stripped.startswith('##') or 
-                    stripped.startswith('【') or
-                    stripped.startswith('###') or
-                    (stripped and not any(x in stripped for x in ['SELECT', 'FROM', 'WHERE', '```']))):
-                    skip_section = False
-                    if stripped and not any(keyword in stripped for keyword in [
-                        '実行例', 'PostgreSQL', 'SQLAlchemy', 'create_engine'
-                    ]):
-                        cleaned_lines.append(line)
+            # SQLコードブロックの終了を検出
+            if skip_until_next_section and '```' in line:
+                skip_until_next_section = False
                 continue
             
-            # 通常の行を追加
-            cleaned_lines.append(line)
+            if not skip_until_next_section:
+                # SQL関連のキーワードが含まれる行はスキップ
+                if any(keyword in line for keyword in [
+                    'SELECT', 'FROM', 'WHERE', 'JOIN', 'GROUP BY', 'ORDER BY',
+                    '実行例', 'PostgreSQL', 'SQLAlchemy', 'create_engine'
+                ]):
+                    continue  # SQL関連の行はスキップ
+                
+                # 通常の行を追加
+                cleaned_lines.append(line)
         
         response = '\n'.join(cleaned_lines)
         
         # 複数の空行を1つに
         response = re.sub(r'\n\s*\n\s*\n+', '\n\n', response)
         
+        # 改行を適切に追加して読みやすくする
+        response = self._format_response_with_line_breaks(response)
+        
         return response.strip()
+    
+    def _format_response_with_line_breaks(self, text: str) -> str:
+        """
+        AIの応答に適切な改行を追加して読みやすくする
+        
+        Args:
+            text: テキスト
+            
+        Returns:
+            フォーマットされたテキスト
+        """
+        if not text:
+            return text
+        
+        # 既に改行が適切に含まれている場合は、そのまま返す
+        if '\n\n' in text or text.count('\n') > len(text) / 100:
+            # 既に改行が含まれている場合は、整理するだけ
+            lines = text.split('\n')
+            formatted_lines = []
+            for line in lines:
+                line = line.strip()
+                if line:
+                    formatted_lines.append(line)
+                elif formatted_lines and formatted_lines[-1]:  # 連続する空行を避ける
+                    formatted_lines.append('')
+            return '\n'.join(formatted_lines)
+        
+        # 改行が少ない場合は、適切な位置に改行を追加
+        # 1. 文の終わり（。、！、？）の後に改行を追加（数字の前は除く）
+        text = re.sub(r'([。！？])([^\d\n])', r'\1\n\2', text)
+        
+        # 2. 「件」「円」「％」などの単位の後に改行を追加（次の文が続く場合）
+        text = re.sub(r'([\d,]+(?:件|円|％|%|人|社|年|月|日|時|分))\s+([^\s\d])', r'\1\n\n\2', text)
+        
+        # 3. 「また」「さらに」「なお」などの接続詞の前に改行を追加
+        text = re.sub(r'\s+(また|さらに|なお|ただし|ただし、|なお、|また、)', r'\n\n\1', text)
+        
+        # 4. 箇条書きの形式（-、・、*）の前に改行を追加
+        text = re.sub(r'\s+([-・*•])\s+', r'\n\1 ', text)
+        
+        # 5. 数字と説明の間に改行を追加（例：「28件です」→「28件\nです」は避け、「28件です。\nまた」とする）
+        # （これは既に1.で処理されているため、不要な処理を避ける）
+        
+        # 6. 連続する空行を1つに
+        text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)
+        
+        # 7. 行頭の余分な空白を削除
+        lines = text.split('\n')
+        formatted_lines = []
+        for line in lines:
+            line = line.strip()
+            if line or (formatted_lines and formatted_lines[-1]):  # 空行は連続させない
+                formatted_lines.append(line)
+        
+        return '\n'.join(formatted_lines)
     
     def _build_system_prompt(self) -> str:
         """
@@ -703,132 +1024,149 @@ class ChatService:
         # schema_info = self.get_cached_schema()  # MySQLから直接取得するため使用しない
         
         base_prompt = """あなたは不動産取引データ分析の専門家です。
-HubSpotから取得した不動産取引データを分析し、ビジネス的な洞察を提供します。
 
-**重要: 言語について**
-- 必ず日本語のみで回答してください
-- 英語や中国語は使用しないでください
-- すべての応答は日本語で書いてください
+【基本ルール】
+- 日本語のみで回答。ベクトルDBからのデータのみ使用（唯一の情報源）
+- SQLクエリ生成・記述禁止。データベース直接アクセス禁止
+- 分析結果のみ返す（コード例・説明文不要）
 
-【データ構造と関係性】
-
-1. **物件（Properties）**
-   - 不動産物件の詳細情報（所在地、価格、面積、築年数など）
-
-2. **取引（Deals）**
-   - **仕入取引（deals_purchase）**: コンタクトから物件を仕入れる取引
-   - **販売取引（deals_sales）**: コンタクトへ物件を販売する取引
-   - 各取引には物件、コンタクト、担当者（owner）が関連付けられています
-
-3. **コンタクト（Contacts）**
-   - 顧客情報（個人・法人）
-   - 会社（Companies）と紐づいています
-   - 担当者（owner）が割り当てられています
-
-4. **会社（Companies）**
-   - 会社情報
-   - コンタクトと紐づいています
-
-5. **オーナー（Owners）**
-   - 営業担当者（ほとんどが営業さん）
-   - コンタクトの担当者として割り当てられます
-   - 取引の作成者・獲得者として記録されます
+【データ構造】
+- 物件（Properties）、仕入取引（deals_purchase）、販売取引（deals_sales）
+- コンタクト（Contacts）: 顧客情報、会社と紐づく、担当者（owner）が割り当てられる
+- オーナー（Owners）: 営業担当者、コンタクトや取引の担当者として記録
 
 【取引フロー】
+- 仕入: コンタクト → 仕入取引 → 物件
+- 販売: 物件 → 販売取引 → コンタクト
 
-仕入フロー:
-  コンタクト（仕入元） → 仕入取引（deals_purchase） → 物件
+【重要な注意事項】
+- 担当者名が質問に明示的に含まれていない限り、担当者でフィルタリングやグループ化をしない
+- 「コンタクトの行動パターン」のような質問では、担当者別に分析しない（全コンタクトを対象に分析）
+- 担当者に関する質問（例：「○○さんの担当するコンタクト」）の場合は除く
 
-販売フロー:
-  物件 → 販売取引（deals_sales） → コンタクト（購入者）
+【契約に至った取引の判定】
+仕入・販売取引ともに、以下いずれかで「契約に至った」と判定：
+- ステージ（dealstage）が「契約」または「決済」
+- 契約日（contract_date）に入力がある
 
-【回答の指針】
-- **ベクトルDBから提供されたデータのみを使用する（唯一の情報源）**
-- SQLクエリは一切生成しない
-- データに基づいた具体的な分析を提供する
-- 数値や統計情報を明確に示す（提供されたデータから抽出）
-- ビジネス的な洞察や推奨事項を含める
-- 日本語で分かりやすく説明する
-- 提供されたデータで回答できない場合は、その旨を正直に伝える
+【件数を聞く質問の場合】
+- 「【重要：データ件数情報】」セクションがあれば、その数値を優先使用（正確な集計値）
+- 「【関連するデータ】」から件数を数えない
 
-【データベース分析の方法】
-
-**ベクトルDBからの関連データを使用（唯一の方法・絶対遵守）**
-
-**件数を聞く質問の場合**:
-- メッセージに「【データ件数情報】」セクションが含まれている場合は、その情報を正確に使用してください
-- 例: 「岩崎さんが担当するコンタクト数: 4,843件」という情報が提供されている場合、その数値を正確に回答してください
-- 推測や近似値ではなく、提供された数値をそのまま使用してください
-
-- システムが自動的にベクトルDBから関連するデータを検索し、メッセージに含めます
-- 以下の情報が自動的に提供されます：
-  - **スキーマ情報**: データベース構造とカラム情報
-  - **ビジネスデータ**: 実際の担当者、会社、コンタクト、取引データ（owners, companies, contacts, deals_purchase, deals_sales等）
-  - **過去の会話**: 類似する過去の質問と回答
-- **提供されたベクトルDBのデータのみを使用して回答してください**
-- ベクトルDBのデータに含まれている情報を読み取り、それを基に回答してください
-- **データに含まれている担当者名、会社名、取引名、金額、日付などの情報を直接使用してください**
-- ベクトルDBのデータで回答できない場合は、その旨を日本語で伝え、「ベクトルDBに該当データがない可能性があります。ETLスクリプトでデータが同期されていない可能性があります」と説明してください
-- **SQLクエリは一切生成・記述しないでください（絶対禁止）**
-- **データベースへの直接アクセスは一切行わないでください**
-
-**重要なルール（絶対遵守）**:
-- **回答は必ず日本語のみで書いてください（英語・中国語は一切使用しない）**
-- **ベクトルDBから提供されたデータのみを使用してください（唯一の情報源）**
-- **SQLクエリは一切生成・記述しないでください（絶対禁止・違反不可）**
-- **```sql ... ``` のようなコードブロックは一切書かないでください**
-- **SELECT文やFROM句などのSQL構文は一切書かないでください**
-- ベクトルDBのデータで回答できない場合は、「ベクトルDBに該当データがない可能性があります。ETLスクリプトでデータが同期されていない可能性があります」と日本語で説明してください
-- 提供されたデータを基に、具体的で実用的な回答を日本語で提供してください
-- **説明文やコード例は不要です。分析結果のみを日本語で返してください**
-- **データベーステーブルへの直接アクセスやSQLクエリの提案は一切行わないでください**
-
-**データの参照方法**:
-- ベクトルDBから提供された「【関連するデータベース情報】」や「【関連するデータ】」セクションを必ず確認してください
-- データに含まれる担当者名（firstname, lastname）、会社名、取引情報（dealname）、金額、日付などの情報を直接使用してください
-- 提供されたデータ内の情報を読み取り、それを基に日本語で回答してください
-- **テーブル名やカラム名を直接参照する必要はありません**
-- **SQLクエリやデータベースへのアクセス方法は一切考えないでください**
-
-**回答の形式**:
-- **必ず日本語のみで回答してください**
-- **ベクトルDBから提供されたデータのみを使用**: メッセージに含まれる「【関連するデータベース情報】」や「【関連するデータ】」セクションを参照して回答してください
-- **データが不足している場合**: 「ベクトルDBに該当データがない可能性があります。ETLスクリプトでデータが同期されていない可能性があります」と日本語で説明してください
-- **その他の説明文、コード例、実行例、SQLクエリ例は一切含めないでください**
-- 提供されたデータを基に**分析結果のみを日本語で返す**
-- 例: 「ベクトルDBのデータによると、久世さんが担当した仕入取引は...（提供されたデータに基づく分析内容）」
-
-**禁止事項（絶対に守ってください）**:
-- ❌ **英語や中国語で回答しない（日本語のみ）**
-- ❌ SQLクエリを一切生成しない（絶対禁止・違反不可）
-- ❌ ```sql ... ``` コードブロックを書かない
-- ❌ SELECT文、FROM句、WHERE句などのSQL構文を一切書かない
-- ❌ データベーステーブルへのアクセス方法を提案しない
-- ❌ Pythonコード例を書かない
-- ❌ PostgreSQLやMySQLの構文例を書かない
-- ❌ SQLAlchemyのコード例を書かない
-- ❌ 「実行例」「以下は」「例えば」などの説明文や前置きを書かない
-- ❌ ベクトルDBから提供されたデータを無視しない
-- ✅ **日本語のみで、ベクトルDBから提供されたデータのみを使用し、分析結果を返す**
-
-**絶対に守ってください（最重要）**:
-- データベースに接続しないでください
-- MySQLやPostgreSQLなどのデータベースシステムを使用しないでください
-- SQLクエリは絶対に生成・記述・実行しないでください
-- データベーステーブルへの直接アクセスは一切行わないでください
-- 提供されたベクトルDBのデータのみを参照してください
-- ベクトルDBにデータがない場合は、「ベクトルDBに該当データがない可能性があります」と説明するだけで、SQLクエリを生成したりデータベースにアクセスしようとしないでください
+【データの使用】
+- ベクトルDBから提供された「【関連するデータベース情報】」「【関連するデータ】」を確認
+- データ内の担当者名、会社名、取引名、金額、日付を直接使用
+- データがない場合は「ベクトルDBに該当データがない可能性があります」と説明
 """
         
         # スキーマ情報はベクトルDBから提供されるため、システムプロンプトには含めない
         return base_prompt
     
+    def _should_search_vector_db(self, message: str) -> bool:
+        """
+        ベクトルDB検索を実行すべきかどうかを判定
+        
+        Args:
+            message: ユーザーメッセージ
+            
+        Returns:
+            検索を実行すべき場合はTrue、スキップすべき場合はFalse
+        """
+        # メッセージが短すぎる場合はスキップ（挨拶など）
+        if len(message.strip()) < 10:
+            return False
+        
+        # データベース関連のキーワードを定義
+        db_keywords = [
+            # 取引関連
+            '取引', '仕入', '販売', 'deal', 'purchase', 'sales',
+            # コンタクト関連
+            'コンタクト', 'contact', '顧客', 'お客様',
+            # 物件関連
+            '物件', 'property', '不動産', 'マンション', 'アパート',
+            # データ関連
+            'データ', '分析', '集計', '統計', '件数', '何件', 'いくつ', '数', 'カウント',
+            # 金額・売上関連
+            '金額', '価格', '売上', '利益', '粗利', '価格', '円',
+            # 担当者関連
+            '担当', '担当者', 'owner', '営業', 'さん', 'さんが',
+            # 会社関連
+            '会社', 'company', '企業',
+            # その他データベース関連
+            '一覧', 'リスト', '検索', '抽出', 'フィルタ', '条件',
+            # 契約関連
+            '契約', '決済', 'ステージ',
+            # フェーズ関連
+            'フェーズ', 'phase'
+        ]
+        
+        # メッセージを小文字に変換してキーワードチェック
+        message_lower = message.lower()
+        for keyword in db_keywords:
+            if keyword in message_lower:
+                return True
+        
+        # データベース関連のキーワードがない場合はスキップ
+        return False
+    
+    def _get_owner_name_to_id_cache(self) -> Dict[str, int]:
+        """
+        担当者名→owner_idのマッピングを取得（キャッシュ付き）
+        
+        Returns:
+            担当者名をキー、owner_idを値とする辞書
+        """
+        now = datetime.now()
+        
+        # キャッシュが有効な場合はそれを返す
+        if (ChatService._owner_cache_timestamp and 
+            ChatService._owner_name_cache and 
+            now - ChatService._owner_cache_timestamp < ChatService._owner_cache_ttl):
+            return ChatService._owner_name_cache.copy()
+        
+        # キャッシュが無効または存在しない場合は新規取得
+        owner_name_to_id = {}
+        
+        if not self.vector_store or not self.vector_store.business_data_collection:
+            return owner_name_to_id
+        
+        try:
+            owner_results = self.vector_store.business_data_collection.get(
+                where={'type': 'owner'},
+                limit=100
+            )
+            if owner_results.get('documents'):
+                for i, doc in enumerate(owner_results['documents']):
+                    metadata = owner_results['metadatas'][i] if owner_results.get('metadatas') else {}
+                    owner_id = metadata.get('id')
+                    # ドキュメントから名前を抽出（「名前: 名 姓」の形式から抽出）
+                    if owner_id and doc and '名前:' in doc:
+                        name_line = doc.split('名前:')[1].split('\\n')[0].strip()
+                        # 名と姓を分割（HubSpotの形式: firstname lastname）
+                        name_parts = name_line.split()
+                        if len(name_parts) >= 2:
+                            first_name = name_parts[0]  # 名
+                            last_name = name_parts[1]  # 姓
+                            # 姓で検出（「岩崎さん」など）
+                            owner_name_to_id[last_name] = owner_id
+                            # 名で検出（「陽さん」など）
+                            if first_name:
+                                owner_name_to_id[first_name] = owner_id
+                        elif len(name_parts) == 1:
+                            # 名前が1つの場合
+                            owner_name_to_id[name_parts[0]] = owner_id
+            
+            # キャッシュを更新
+            ChatService._owner_name_cache = owner_name_to_id
+            ChatService._owner_cache_timestamp = now
+            logger.info(f"担当者情報キャッシュを更新しました: {len(owner_name_to_id)}件")
+        except Exception as e:
+            logger.warning(f"担当者情報の取得に失敗: {str(e)}")
+            # エラーの場合は空の辞書を返す
+        
+        return owner_name_to_id
+    
     # MySQLから直接データを取得する機能は削除（ベクトルDBからの検索のみ使用）
     # 以下のメソッドは削除されました：
     # - _get_sample_data_for_ai
     # - _get_owners_sample
-    # - _get_deals_purchase_sample
-    # - _get_deals_sales_sample
-    # - _get_contacts_sample
-    # データはベクトルDB（business_dataコレクション）から検索されます
-

@@ -344,9 +344,27 @@ class VectorDataSync:
                         o.firstname as owner_firstname,
                         o.lastname as owner_lastname,
                         dp.created_at,
-                        dp.updated_at
+                        dp.updated_at,
+                        -- コンタクト情報
+                        GROUP_CONCAT(DISTINCT CONCAT(c.firstname, ' ', c.lastname) SEPARATOR ', ') as contact_names,
+                        GROUP_CONCAT(DISTINCT c.email SEPARATOR ', ') as contact_emails,
+                        GROUP_CONCAT(DISTINCT c.phone SEPARATOR ', ') as contact_phones,
+                        -- 物件情報
+                        GROUP_CONCAT(DISTINCT p.bukken_name SEPARATOR ', ') as property_names,
+                        GROUP_CONCAT(DISTINCT CONCAT(p.bukken_state, ' ', p.bukken_city) SEPARATOR ', ') as property_locations,
+                        GROUP_CONCAT(DISTINCT p.bukken_type SEPARATOR ', ') as property_types,
+                        GROUP_CONCAT(DISTINCT p.bukken_structure SEPARATOR ', ') as property_structures,
+                        GROUP_CONCAT(DISTINCT p.bukken_land_area SEPARATOR ', ') as property_land_areas,
+                        GROUP_CONCAT(DISTINCT p.total_floor_area SEPARATOR ', ') as property_floor_areas
                     FROM deals_purchase dp
                     LEFT JOIN owners o ON dp.hubspot_owner_id = o.id
+                    LEFT JOIN deal_purchase_contact_associations dpca ON dp.id = dpca.deal_id
+                    LEFT JOIN contacts c ON dpca.contact_id = c.id
+                    LEFT JOIN deal_purchase_property_associations dppa ON dp.id = dppa.deal_id
+                    LEFT JOIN properties p ON dppa.property_id = p.id
+                    GROUP BY dp.id, dp.hubspot_id, dp.dealname, dp.research_purchase_price,
+                             dp.settlement_date, dp.contract_date, dp.bukken_created,
+                             dp.hubspot_owner_id, o.firstname, o.lastname, dp.created_at, dp.updated_at
                     ORDER BY dp.id
                 """)
                 rows = await cursor.fetchall()
@@ -367,6 +385,7 @@ class VectorDataSync:
                             "hubspot_id": row.get('hubspot_id') or '',
                             "owner_id": row.get('hubspot_owner_id') or 0,
                             "settlement_date": row.get('settlement_date').isoformat() if row.get('settlement_date') else '',
+                            "contract_date": row.get('contract_date').isoformat() if row.get('contract_date') else '',
                             "updated_at": row.get('updated_at', datetime.now()).isoformat() if row.get('updated_at') else datetime.now().isoformat()
                         }
                         metadata = self._sanitize_metadata(metadata)
@@ -601,6 +620,29 @@ class VectorDataSync:
             parts.append(f"決済日: {row['settlement_date'].strftime('%Y-%m-%d')}")
         if row.get('contract_date'):
             parts.append(f"契約日: {row['contract_date'].strftime('%Y-%m-%d')}")
+        
+        # コンタクト情報
+        if row.get('contact_names'):
+            parts.append(f"関連コンタクト: {row['contact_names']}")
+            if row.get('contact_emails'):
+                parts.append(f"コンタクトメール: {row['contact_emails']}")
+            if row.get('contact_phones'):
+                parts.append(f"コンタクト電話: {row['contact_phones']}")
+        
+        # 物件情報
+        if row.get('property_names'):
+            parts.append(f"関連物件: {row['property_names']}")
+            if row.get('property_locations'):
+                parts.append(f"物件所在地: {row['property_locations']}")
+            if row.get('property_types'):
+                parts.append(f"物件種別: {row['property_types']}")
+            if row.get('property_structures'):
+                parts.append(f"構造: {row['property_structures']}")
+            if row.get('property_land_areas'):
+                parts.append(f"土地面積: {row['property_land_areas']}㎡")
+            if row.get('property_floor_areas'):
+                parts.append(f"延床面積: {row['property_floor_areas']}㎡")
+        
         return "\n".join(parts)
     
     def _format_deal_sales_text(self, row: Dict) -> str:

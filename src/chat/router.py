@@ -2,13 +2,37 @@
 チャットルーター（管理画面用）
 """
 import os
+import json
+import logging
+from datetime import datetime
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, AsyncGenerator, Dict, Any
 from src.middleware.auth import get_current_user, require_login
 from src.chat.service import ChatService
+
+logger = logging.getLogger(__name__)
+
+
+def convert_datetime_to_str(obj: Any) -> Any:
+    """datetimeオブジェクトを文字列に変換（再帰的）"""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    elif isinstance(obj, dict):
+        return {key: convert_datetime_to_str(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_datetime_to_str(item) for item in obj]
+    return obj
+
+
+class DateTimeJSONEncoder(json.JSONEncoder):
+    """datetimeオブジェクトをJSONにシリアライズするためのカスタムエンコーダー"""
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
 
 router = APIRouter()
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "..", "..", "templates"))
@@ -55,7 +79,9 @@ async def get_sessions(
             owner_id=None  # ユーザーごとのチャットのみ
         )
         logger.info(f"セッション取得完了: {len(sessions)}件")
-        return JSONResponse(content={"sessions": sessions})
+        # datetimeオブジェクトを文字列に変換
+        sessions_json = convert_datetime_to_str(sessions)
+        return JSONResponse(content={"sessions": sessions_json})
     except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
@@ -91,7 +117,10 @@ async def get_messages(
         
         chat_service = ChatService()
         messages = await chat_service.get_messages(session_id)
-        return JSONResponse(content={"messages": messages})
+        logger.info(f"メッセージ取得: session_id={session_id}, messages_count={len(messages)}")
+        # datetimeオブジェクトを文字列に変換
+        messages_json = convert_datetime_to_str(messages)
+        return JSONResponse(content={"messages": messages_json})
     except Exception as e:
         return JSONResponse(
             status_code=500,
@@ -104,10 +133,7 @@ async def send_message(
     chat_request: ChatMessageRequest,
     user: dict = Depends(get_current_user)
 ):
-    """メッセージを送信"""
-    import logging
-    logger = logging.getLogger(__name__)
-    
+    """メッセージを送信（非ストリーミング、後方互換性のため保持）"""
     if not user:
         from fastapi.responses import RedirectResponse
         return RedirectResponse(url="/auth/login")
@@ -133,6 +159,61 @@ async def send_message(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/send-stream")
+async def send_message_stream(
+    chat_request: ChatMessageRequest,
+    user: dict = Depends(get_current_user)
+):
+    """メッセージを送信（ストリーミング対応）"""
+    if not user:
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url="/auth/login")
+    
+    async def generate_stream() -> AsyncGenerator[str, None]:
+        """ストリーミングレスポンスを生成"""
+        try:
+            logger.info(f"チャットメッセージ受信（ストリーミング）: user_id={user['id']}, message_length={len(chat_request.message)}")
+            
+            chat_service = ChatService()
+            
+            # セッションIDを送信
+            session_id = await chat_service._prepare_session(
+                user_id=user['id'],
+                message=chat_request.message,
+                session_id=chat_request.session_id,
+                owner_id=None
+            )
+            
+            yield f"data: {json.dumps({'type': 'session_id', 'session_id': session_id}, cls=DateTimeJSONEncoder)}\n\n"
+            
+            # ストリーミングでAI応答を取得
+            async for chunk in chat_service.send_message_stream(
+                user_id=user['id'],
+                message=chat_request.message,
+                session_id=session_id,
+                owner_id=None
+            ):
+                yield f"data: {json.dumps(chunk, cls=DateTimeJSONEncoder)}\n\n"
+            
+            # 完了を通知
+            yield f"data: {json.dumps({'type': 'done'}, cls=DateTimeJSONEncoder)}\n\n"
+            
+        except Exception as e:
+            logger.error(f"チャット送信エラー（ストリーミング）: {str(e)}", exc_info=True)
+            error_data = {'type': 'error', 'error': str(e)}
+            yield f"data: {json.dumps(error_data, cls=DateTimeJSONEncoder)}\n\n"
+    
+    return StreamingResponse(
+        generate_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"  # Nginxのバッファリングを無効化
+        }
+    )
+
+
 @router.post("/sessions/new")
 @require_login
 async def create_session(
@@ -151,5 +232,60 @@ async def create_session(
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
+        )
+
+
+@router.delete("/sessions/{session_id}")
+@require_login
+async def delete_session(
+    request: Request,
+    session_id: int,
+    user: dict = None
+):
+    """チャットセッションを削除"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # セッションがユーザーのものか確認
+        from src.database.connection import DatabaseConnection
+        async with DatabaseConnection.get_cursor() as (cursor, conn):
+            try:
+                # セッションの存在確認と権限チェック
+                await cursor.execute(
+                    "SELECT user_id FROM chat_sessions WHERE id = %s",
+                    (session_id,)
+                )
+                session = await cursor.fetchone()
+                if not session:
+                    return JSONResponse(
+                        status_code=404,
+                        content={"error": "セッションが見つかりません"}
+                    )
+                if session['user_id'] != user['id']:
+                    return JSONResponse(
+                        status_code=403,
+                        content={"error": "アクセス権限がありません"}
+                    )
+                
+                # セッションを削除（ON DELETE CASCADEによりメッセージも自動削除される）
+                await cursor.execute(
+                    "DELETE FROM chat_sessions WHERE id = %s",
+                    (session_id,)
+                )
+                await conn.commit()
+                
+                logger.info(f"セッション削除成功: session_id={session_id}, user_id={user['id']}")
+                return JSONResponse(content={"message": "セッションを削除しました"})
+            except Exception as db_error:
+                # データベースエラーが発生した場合はロールバック
+                await conn.rollback()
+                logger.error(f"セッション削除DBエラー: {str(db_error)}", exc_info=True)
+                raise db_error
+    except Exception as e:
+        logger.error(f"セッション削除エラー: {str(e)}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"セッションの削除に失敗しました: {str(e)}"}
         )
 

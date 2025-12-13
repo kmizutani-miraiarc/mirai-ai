@@ -7,11 +7,18 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.css">
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
         .sidebar {
-            min-height: 100vh;
+            height: 100vh;
             background: #2c3e50;
             color: white;
             padding: 20px;
+            overflow-y: auto;
         }
         .sidebar a {
             color: white;
@@ -24,10 +31,26 @@
         .sidebar a:hover {
             background: #34495e;
         }
+        .main-content {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+        .chat-column {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 0;
+            overflow: hidden; /* はみ出しを防ぐ */
+        }
         .chat-container {
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 200px);
+            flex: 1;
+            padding: 15px;
+            min-height: 0; /* flexboxでoverflowを有効にするために必要 */
+            overflow: hidden; /* はみ出しを防ぐ */
         }
         .chat-messages {
             flex: 1;
@@ -35,12 +58,16 @@
             padding: 20px;
             background: #f8f9fa;
             border-radius: 5px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            min-height: 0; /* flexboxでoverflowを有効にするために必要 */
+            overflow-y: auto; /* スクロール可能に */
         }
         .message {
             margin-bottom: 15px;
             padding: 10px;
             border-radius: 5px;
+            white-space: pre-wrap; /* 改行を保持 */
+            word-wrap: break-word; /* 長い単語を折り返し */
         }
         .message.user {
             background: #007bff;
@@ -55,24 +82,57 @@
         .chat-input {
             display: flex;
             gap: 10px;
+            flex-shrink: 0; /* 入力欄は縮小しない */
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
         }
         .chat-input textarea {
             flex: 1;
+            resize: vertical; /* 縦方向のリサイズのみ許可 */
+            max-height: 200px; /* 最大高さを制限 */
         }
         .session-list {
-            max-height: 400px;
+            flex: 1;
             overflow-y: auto;
+            max-height: calc(100vh - 150px);
         }
         .session-item {
             padding: 10px;
             cursor: pointer;
             border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
         }
         .session-item:hover {
             background: #f0f0f0;
         }
         .session-item.active {
             background: #e3f2fd;
+        }
+        .session-item-content {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .session-delete-btn {
+            padding: 2px 8px;
+            font-size: 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .session-item:hover .session-delete-btn {
+            opacity: 1;
+        }
+        .session-delete-btn:hover {
+            background: #c82333;
         }
     </style>
 </head>
@@ -96,16 +156,16 @@
                     <i data-feather="log-out"></i> ログアウト
                 </a>
             </div>
-            <div class="col-md-10">
-                <div class="row mt-3">
-                    <div class="col-md-3">
+            <div class="col-md-10 main-content">
+                <div class="row h-100 m-0">
+                    <div class="col-md-3 p-3 border-end">
                         <h5>チャットセッション</h5>
-                        <button class="btn btn-primary btn-sm mb-2" onclick="createNewSession()">
+                        <button class="btn btn-primary btn-sm mb-2 w-100" onclick="createNewSession()">
                             <i data-feather="plus"></i> 新規チャット
                         </button>
                         <div class="session-list" id="sessionList"></div>
                     </div>
-                    <div class="col-md-9">
+                    <div class="col-md-9 p-0 chat-column">
                         <div class="chat-container">
                             <div class="chat-messages" id="chatMessages">
                                 <p class="text-muted text-center">チャットセッションを選択するか、新規チャットを開始してください</p>
@@ -149,9 +209,29 @@
                     data.sessions.forEach(session => {
                         const div = document.createElement('div');
                         div.className = 'session-item';
-                        div.textContent = session.title || `セッション #${session.id}`;
-                        div.onclick = (e) => loadSession(session.id, e.target);
+                        
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'session-item-content';
+                        contentDiv.textContent = session.title || `セッション #${session.id}`;
+                        contentDiv.onclick = (e) => {
+                            e.stopPropagation();
+                            loadSession(session.id, div);
+                        };
+                        
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'session-delete-btn';
+                        deleteBtn.innerHTML = '<i data-feather="trash-2"></i>';
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            deleteSession(session.id, div);
+                        };
+                        
+                        div.appendChild(contentDiv);
+                        div.appendChild(deleteBtn);
                         sessionList.appendChild(div);
+                        
+                        // Featherアイコンを更新
+                        feather.replace();
                     });
                 } else {
                     sessionList.innerHTML = '<p class="text-muted">チャットセッションがありません</p>';
@@ -173,6 +253,7 @@
             }
             
             try {
+                console.log(`セッション履歴を読み込みます: sessionId=${sessionId}`);
                 const response = await fetch(`/chat/sessions/${sessionId}/messages`);
                 
                 if (!response.ok) {
@@ -190,17 +271,29 @@
                 
                 const data = await response.json();
                 
+                console.log('取得したデータ:', data);
+                console.log('メッセージ数:', data.messages ? data.messages.length : 0);
+                
                 const chatMessages = document.getElementById('chatMessages');
                 chatMessages.innerHTML = '';
                 
                 if (data.messages && data.messages.length > 0) {
-                    data.messages.forEach(msg => {
+                    console.log(`履歴を読み込みました: ${data.messages.length}件のメッセージ`);
+                    data.messages.forEach((msg, index) => {
+                        console.log(`メッセージ ${index + 1}:`, {role: msg.role, contentLength: msg.content ? msg.content.length : 0, content: msg.content ? msg.content.substring(0, 50) : 'null'});
                         const div = document.createElement('div');
                         div.className = `message ${msg.role}`;
-                        div.textContent = msg.content;
+                        // contentが存在することを確認
+                        if (msg.content) {
+                            div.textContent = msg.content; // white-space: pre-wrapで改行が保持される
+                        } else {
+                            console.warn(`メッセージ ${index + 1} のcontentが空です:`, msg);
+                            div.textContent = '[メッセージ内容がありません]';
+                        }
                         chatMessages.appendChild(div);
                     });
                 } else {
+                    console.log('履歴にメッセージがありません');
                     chatMessages.innerHTML = '<p class="text-muted text-center">メッセージがありません</p>';
                 }
                 
@@ -240,21 +333,20 @@
             const chatMessages = document.getElementById('chatMessages');
             const userMsg = document.createElement('div');
             userMsg.className = 'message user';
-            userMsg.textContent = message;
+            userMsg.textContent = message; // white-space: pre-wrapで改行が保持される
             chatMessages.appendChild(userMsg);
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
             input.value = '';
             
-            // 読み込み中の表示
-            const loadingMsg = document.createElement('div');
-            loadingMsg.className = 'message assistant';
-            loadingMsg.innerHTML = '<i>考え中...</i>';
-            chatMessages.appendChild(loadingMsg);
+            // AI応答用の要素を作成（ストリーミング用）
+            const aiMsg = document.createElement('div');
+            aiMsg.className = 'message assistant';
+            chatMessages.appendChild(aiMsg);
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
             try {
-                // リクエストボディを構築（nullの値は除外）
+                // リクエストボディを構築
                 const requestBody = {
                     message: message
                 };
@@ -262,69 +354,76 @@
                     requestBody.session_id = currentSessionId;
                 }
                 
-                const response = await fetch('/chat/send', {
+                // ストリーミング対応のfetch
+                const response = await fetch('/chat/send-stream', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(requestBody)
                 });
                 
-                // 読み込みメッセージを削除
-                loadingMsg.remove();
-                
                 if (!response.ok) {
-                    // エラーレスポンスの場合
-                    let errorMessage = 'エラーが発生しました';
-                    try {
-                        const errorData = await response.json();
-                        console.error('エラーレスポンス:', errorData);
-                        // FastAPIのバリデーションエラーの場合は詳細を表示
-                        if (errorData.detail) {
-                            if (Array.isArray(errorData.detail)) {
-                                // バリデーションエラーの場合
-                                errorMessage = errorData.detail.map(e => `${e.loc.join('.')}: ${e.msg}`).join(', ');
-                            } else {
-                                errorMessage = errorData.detail;
-                            }
-                        } else {
-                            errorMessage = errorData.error || errorMessage;
-                        }
-                    } catch (e) {
-                        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                // ReadableStreamを読み取る
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                
+                while (true) {
+                    const {done, value} = await reader.read();
+                    if (done) break;
                     
-                    const errorMsg = document.createElement('div');
-                    errorMsg.className = 'message assistant';
-                    errorMsg.style.color = 'red';
-                    errorMsg.textContent = `エラー: ${errorMessage}`;
-                    chatMessages.appendChild(errorMsg);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                    console.error('チャット送信エラー:', errorMessage);
-                    return;
+                    buffer += decoder.decode(value, {stream: true});
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || ''; // 最後の不完全な行をバッファに保持
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                
+                                if (data.type === 'session_id') {
+                                    // セッションIDを設定（新規セッションの場合）
+                                    if (!currentSessionId && data.session_id) {
+                                        currentSessionId = data.session_id;
+                                        loadSessions(); // セッションリストを更新
+                                    } else if (data.session_id && currentSessionId !== data.session_id) {
+                                        // セッションIDが変更された場合も更新
+                                        currentSessionId = data.session_id;
+                                        loadSessions();
+                                    }
+                                } else if (data.type === 'chunk') {
+                                    // タイピング効果で逐次表示
+                                    aiMsg.textContent += data.content;
+                                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                                } else if (data.type === 'error') {
+                                    aiMsg.style.color = 'red';
+                                    aiMsg.textContent = `エラー: ${data.error}`;
+                                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                                    return;
+                                } else if (data.type === 'done') {
+                                    // ストリーミング完了
+                                    // メッセージは既に画面に表示されているので、履歴再読み込みは不要
+                                    // セッションリストは既に更新済み（session_idイベントで）
+                                    break;
+                                }
+                            } catch (e) {
+                                console.error('JSON解析エラー:', e, line);
+                            }
+                        }
+                    }
                 }
                 
-                const data = await response.json();
-                
-                // AI応答を表示
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'message assistant';
-                aiMsg.textContent = data.response || '応答がありませんでした';
-                chatMessages.appendChild(aiMsg);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                // セッションIDを更新
-                if (!currentSessionId && data.session_id) {
-                    currentSessionId = data.session_id;
-                    loadSessions(); // セッションリストを更新
+                // 最終的な内容を確認
+                if (!aiMsg.textContent.trim()) {
+                    aiMsg.textContent = '応答がありませんでした';
                 }
+                
             } catch (error) {
-                // 読み込みメッセージを削除
-                loadingMsg.remove();
-                
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'message assistant';
-                errorMsg.style.color = 'red';
-                errorMsg.textContent = `エラー: ${error.message}`;
-                chatMessages.appendChild(errorMsg);
+                // エラーメッセージを表示
+                aiMsg.style.color = 'red';
+                aiMsg.textContent = `エラー: ${error.message}`;
                 chatMessages.scrollTop = chatMessages.scrollHeight;
                 console.error('チャット送信エラー:', error);
                 alert('エラー: ' + error.message);
@@ -342,6 +441,49 @@
                 sendMessage();
             }
         });
+        
+        async function deleteSession(sessionId, element) {
+            if (!confirm('このチャット履歴を削除してもよろしいですか？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/chat/sessions/${sessionId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert('削除に失敗しました: ' + (errorData.error || '不明なエラー'));
+                    return;
+                }
+                
+                // 要素を削除
+                element.remove();
+                
+                // 削除したセッションが現在のセッションの場合、チャットをクリア
+                if (currentSessionId === sessionId) {
+                    currentSessionId = null;
+                    document.getElementById('chatMessages').innerHTML = '<p class="text-muted text-center">チャットセッションを選択するか、新規チャットを開始してください</p>';
+                    document.getElementById('messageInput').disabled = true;
+                    document.getElementById('sendButton').disabled = true;
+                    
+                    // アクティブ状態をクリア
+                    document.querySelectorAll('.session-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                }
+                
+                // セッションリストが空になった場合の処理
+                const sessionList = document.getElementById('sessionList');
+                if (sessionList.children.length === 0 || (sessionList.children.length === 1 && sessionList.children[0].tagName === 'P')) {
+                    sessionList.innerHTML = '<p class="text-muted">チャットセッションがありません</p>';
+                }
+            } catch (error) {
+                console.error('セッション削除エラー:', error);
+                alert('エラー: ' + error.message);
+            }
+        }
         
         // 初期読み込み
         loadSessions();
