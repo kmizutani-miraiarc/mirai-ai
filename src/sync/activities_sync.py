@@ -23,8 +23,8 @@ class ActivitiesSync(BaseSync):
         activities = []
         after = None
         limit = 100
-        # 取得対象のアクティビティタイプ
-        target_types = {"CALL", "EMAIL", "INCOMING_EMAIL", "FORWARDED_EMAIL", "NOTE"}
+        # 取得対象のアクティビティタイプ（INCOMING_EMAILとFORWARDED_EMAILは除外）
+        target_types = {"CALL", "EMAIL", "NOTE"}
 
         try:
             offset = None
@@ -182,6 +182,47 @@ class ActivitiesSync(BaseSync):
                     # Owner IDの解決
                     owner_id_str = engagement.get("engagement", {}).get("ownerId")
                     owner_id = await self._get_owner_id(owner_id_str) if owner_id_str else None
+                    
+                    # EMAILタイプでownerIdが取得できない場合、関連付けられたオブジェクトから取得
+                    if not owner_id and activity_type == "EMAIL":
+                        associations = engagement.get("associations", {})
+                        logger.debug(f"EMAILアクティビティ {engagement_id}: associations={list(associations.keys())}")
+                        # 優先順位: contactIds > companyIds > dealIds
+                        for assoc_type in ["contactIds", "companyIds", "dealIds"]:
+                            if assoc_type in associations and associations[assoc_type]:
+                                object_type_map = {
+                                    "contactIds": "contacts",
+                                    "companyIds": "companies",
+                                    "dealIds": "deals_purchase"
+                                }
+                                object_type = object_type_map.get(assoc_type)
+                                if object_type:
+                                    # 最初の関連オブジェクトのownerIdを取得
+                                    hubspot_object_id = str(associations[assoc_type][0])
+                                    object_id = await self._get_object_id(object_type, hubspot_object_id)
+                                    if object_id:
+                                        # オブジェクトのhubspot_owner_idを取得
+                                        try:
+                                            await cursor.execute(
+                                                f"SELECT hubspot_owner_id FROM {object_type} WHERE id = %s",
+                                                (object_id,)
+                                            )
+                                            object_result = await cursor.fetchone()
+                                            if object_result and object_result.get("hubspot_owner_id"):
+                                                object_owner_id_str = str(object_result.get("hubspot_owner_id"))
+                                                owner_id = await self._get_owner_id(object_owner_id_str)
+                                                if owner_id:
+                                                    logger.info(f"EMAILアクティビティ {engagement_id} のownerIdを関連オブジェクト ({object_type}, id={object_id}, hubspot_owner_id={object_owner_id_str}) から取得: {owner_id}")
+                                                    break
+                                                else:
+                                                    logger.warning(f"EMAILアクティビティ {engagement_id}: hubspot_owner_id={object_owner_id_str} に対応するowner_idが見つかりませんでした")
+                                            else:
+                                                logger.debug(f"EMAILアクティビティ {engagement_id}: {object_type} id={object_id} のhubspot_owner_idがNULLです")
+                                        except Exception as e:
+                                            logger.warning(f"関連オブジェクトからownerIdを取得する際にエラー: {str(e)}")
+                                            continue
+                                    else:
+                                        logger.debug(f"EMAILアクティビティ {engagement_id}: {object_type} hubspot_id={hubspot_object_id} に対応するobject_idが見つかりませんでした")
                     
                     # タイムスタンプ
                     timestamp_ms = engagement.get("engagement", {}).get("timestamp")

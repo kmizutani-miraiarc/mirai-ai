@@ -258,54 +258,110 @@ class ChatService:
                     # 件数を聞く質問かどうかを判定（「何件」「いくつ」「数」などのキーワード）
                     # 現在のメッセージのみを対象に判定（過去の会話履歴は除外）
                     current_message_only = message
-                    is_count_query = any(keyword in current_message_only for keyword in ['何件', 'いくつ', '数', '件数', 'カウント', '件ありますか'])
+                    is_count_query = any(keyword in current_message_only for keyword in ['何件', 'いくつ', '数', '件数', 'カウント', '件ありますか', '総件数', '合計'])
                     
-                    if is_count_query:
+                    # コンタクト、取引、物件、会社、アクティビティに関する質問の場合は、総数を自動的に提供
+                    is_data_query = any(keyword in current_message_only.lower() for keyword in [
+                        'コンタクト', 'contact', '取引', 'deal', '仕入', '販売', '物件', 'property', '会社', 'company',
+                        'アクティビティ', 'activity', 'activities',
+                        '一覧', 'リスト', 'すべて', '全部', '総数', '合計'
+                    ])
+                    
+                    # 件数クエリまたはデータクエリの場合に総数を提供
+                    if is_count_query or is_data_query:
                         # 件数を聞く質問の場合、メタデータで直接カウント
                         # 担当者名からowner_idを特定する処理を追加（キャッシュ使用）
                         owner_name_to_id = self._get_owner_name_to_id_cache()
                         
+                        # 質問に含まれるデータタイプを検出（現在のメッセージのみ）
+                        data_type_keywords = {
+                            'コンタクト': ('contact', 'コンタクト数', None),
+                            'contact': ('contact', 'コンタクト数', None),
+                            '仕入取引': ('deal_purchase', '仕入取引数', None),
+                            '仕入': ('deal_purchase', '仕入取引数', None),
+                            '販売取引': ('deal_sales', '販売取引数', None),
+                            '販売': ('deal_sales', '販売取引数', None),
+                            '物件': ('property', '物件数', None),
+                            '会社': ('company', '会社数', None),
+                            'アクティビティ': ('activity', 'アクティビティ数', None),
+                            'activity': ('activity', 'アクティビティ数', None),
+                            'activities': ('activity', 'アクティビティ数', None),
+                        }
+                        
+                        detected_types = []
+                        for keyword, (type_filter, label, text_filter) in data_type_keywords.items():
+                            if keyword in current_message_only.lower():
+                                detected_types.append((type_filter, label, text_filter))
+                        
+                        # データタイプが検出されない場合は、全データタイプの総数を提供
+                        if not detected_types and is_data_query:
+                            detected_types = [
+                                ('contact', 'コンタクト数', None),
+                                ('deal_purchase', '仕入取引数', None),
+                                ('deal_sales', '販売取引数', None),
+                                ('property', '物件数', None),
+                                ('company', '会社数', None),
+                                ('activity', 'アクティビティ数', None),
+                            ]
+                        
                         # 質問に含まれる担当者名に基づいてカウント（現在のメッセージのみ）
                         count_info_parts = []
                         import re
+                        owner_name_to_id = self._get_owner_name_to_id_cache()
+                        
+                        # 担当者名が明示的に指定されている場合のみ、担当者別にカウント
+                        owner_specified = False
                         for name, owner_id in owner_name_to_id.items():
-                            # 担当者名を単語単位で検出（部分文字列マッチを避ける）
-                            # 現在のメッセージのみを対象に検出（過去の会話履歴は除外）
-                            # 例：「岩崎」は「岩崎さん」「岩崎が」などは検出するが、「行動パターン」の中の「岩崎」は検出しない
                             name_pattern = re.compile(rf'\b{re.escape(name)}\b|{re.escape(name)}さん|{re.escape(name)}が|{re.escape(name)}の|{re.escape(name)}は|{re.escape(name)}を|{re.escape(name)}に|{re.escape(name)}で')
                             if name_pattern.search(current_message_only):
-                                # 質問に含まれるデータタイプに応じてカウント
-                                data_type_keywords = {
-                                    'コンタクト': ('contact', 'コンタクト数', None),
-                                    'contact': ('contact', 'コンタクト数', None),
-                                    '仕入取引': ('deal_purchase', '仕入取引数', None),
-                                    '仕入': ('deal_purchase', '仕入取引数', None),
-                                    '販売取引': ('deal_sales', '販売取引数', None),
-                                    '販売': ('deal_sales', '販売取引数', None),
-                                    '物件': ('property', '物件数', None),
-                                    '会社': ('company', '会社数', None),
-                                }
-                                
-                                # 質問に含まれるデータタイプを検出（現在のメッセージのみ）
-                                detected_types = []
-                                for keyword, (type_filter, label, text_filter) in data_type_keywords.items():
-                                    if keyword in current_message_only:
-                                        detected_types.append((type_filter, label, text_filter))
-                                
-                                # データタイプが検出されない場合は、デフォルトでコンタクト数をカウント
-                                if not detected_types:
-                                    detected_types = [('contact', 'コンタクト数', None)]
-                                
-                                # 各データタイプの件数をカウント
-                                for type_filter, label, text_filter in detected_types:
-                                    # 総件数をカウント
+                                owner_specified = True
+                                # 検出されたデータタイプ（または全タイプ）の件数をカウント
+                                types_to_count = detected_types if detected_types else [
+                                    ('contact', 'コンタクト数', None),
+                                    ('deal_purchase', '仕入取引数', None),
+                                    ('deal_sales', '販売取引数', None),
+                                    ('property', '物件数', None),
+                                    ('company', '会社数', None),
+                                    ('activity', 'アクティビティ数', None),
+                                ]
+                                for type_filter, label, text_filter in types_to_count:
                                     count = self.vector_store.count_business_data_by_metadata(
                                         type_filter=type_filter,
                                         owner_id=owner_id
                                     )
                                     count_info_parts.append(f"{name}さんが担当する{label}: {count:,}件")
                                     
-                                    # 「契約まで至った」「契約した」などのキーワードが含まれている場合（現在のメッセージのみ）
+                                    # アクティビティの内訳（電話、メール、メモ）を取得
+                                    if type_filter == 'activity' and any(kw in current_message_only for kw in ['内訳', '電話', 'メール', 'メモ', 'CALL', 'EMAIL', 'NOTE']):
+                                        # 電話（CALL）
+                                        call_count = self.vector_store.count_business_data_by_metadata(
+                                            type_filter='activity',
+                                            owner_id=owner_id,
+                                            activity_type='CALL'
+                                        )
+                                        count_info_parts.append(f"  - 電話: {call_count:,}件")
+                                        
+                                        # メール（EMAIL, INCOMING_EMAIL, FORWARDED_EMAIL）
+                                        email_types = ['EMAIL', 'INCOMING_EMAIL', 'FORWARDED_EMAIL']
+                                        email_total = 0
+                                        for email_type in email_types:
+                                            email_count = self.vector_store.count_business_data_by_metadata(
+                                                type_filter='activity',
+                                                owner_id=owner_id,
+                                                activity_type=email_type
+                                            )
+                                            email_total += email_count
+                                        count_info_parts.append(f"  - メール: {email_total:,}件")
+                                        
+                                        # メモ（NOTE）
+                                        note_count = self.vector_store.count_business_data_by_metadata(
+                                            type_filter='activity',
+                                            owner_id=owner_id,
+                                            activity_type='NOTE'
+                                        )
+                                        count_info_parts.append(f"  - メモ: {note_count:,}件")
+                                    
+                                    # 「契約まで至った」「契約した」などのキーワードが含まれている場合
                                     if type_filter == 'deal_sales' and any(kw in current_message_only for kw in ['契約まで', '契約した', '契約日', '契約済み', '契約完了']):
                                         contract_count = self.vector_store.count_business_data_with_text_filter(
                                             type_filter=type_filter,
@@ -313,6 +369,45 @@ class ChatService:
                                             text_contains='契約日:'
                                         )
                                         count_info_parts.append(f"{name}さんが担当する契約まで至った販売取引数: {contract_count:,}件")
+                        
+                        # 担当者名が指定されていない場合は、全体の総数をカウント
+                        if not owner_specified and detected_types:
+                            for type_filter, label, text_filter in detected_types:
+                                count = self.vector_store.count_business_data_by_metadata(
+                                    type_filter=type_filter,
+                                    owner_id=None
+                                )
+                                count_info_parts.append(f"{label}（全体）: {count:,}件")
+                                
+                                # アクティビティの内訳（電話、メール、メモ）を取得
+                                if type_filter == 'activity' and any(kw in current_message_only for kw in ['内訳', '電話', 'メール', 'メモ', 'CALL', 'EMAIL', 'NOTE']):
+                                    # 電話（CALL）
+                                    call_count = self.vector_store.count_business_data_by_metadata(
+                                        type_filter='activity',
+                                        owner_id=None,
+                                        activity_type='CALL'
+                                    )
+                                    count_info_parts.append(f"  - 電話: {call_count:,}件")
+                                    
+                                    # メール（EMAIL, INCOMING_EMAIL, FORWARDED_EMAIL）
+                                    email_types = ['EMAIL', 'INCOMING_EMAIL', 'FORWARDED_EMAIL']
+                                    email_total = 0
+                                    for email_type in email_types:
+                                        email_count = self.vector_store.count_business_data_by_metadata(
+                                            type_filter='activity',
+                                            owner_id=None,
+                                            activity_type=email_type
+                                        )
+                                        email_total += email_count
+                                    count_info_parts.append(f"  - メール: {email_total:,}件")
+                                    
+                                    # メモ（NOTE）
+                                    note_count = self.vector_store.count_business_data_by_metadata(
+                                        type_filter='activity',
+                                        owner_id=None,
+                                        activity_type='NOTE'
+                                    )
+                                    count_info_parts.append(f"  - メモ: {note_count:,}件")
                         
                         if count_info_parts:
                             # 件数情報を最初に配置し、強調する
@@ -325,8 +420,10 @@ class ChatService:
                             db_context += "=" * 80 + "\n\n"
                     
                     # similar_business_dataは既に並列検索で取得済み
+                    # 件数クエリの場合は、件数情報が提供されているため、similar_business_dataは使用しない（limit=10の制限を回避）
+                    use_similar_business_data = similar_business_data and not is_count_query
                     
-                    if similar_db_info or similar_business_data or db_context:
+                    if similar_db_info or use_similar_business_data or db_context:
                         if not db_context:
                             db_context = "\n【関連するデータベース情報】\n"
                         
@@ -339,13 +436,15 @@ class ChatService:
                         
                         # ビジネスデータを追加（完全な内容を表示）
                         # ただし、件数情報が提供されている場合は、サンプルデータであることを明記
-                        if similar_business_data:
-                            if count_info_parts:
+                        # 件数クエリの場合は、件数情報が正確に提供されているため、サンプルデータは含めない
+                        if use_similar_business_data:
+                            # 件数情報が提供されている場合は、サンプルデータであることを明記
+                            if 'count_info_parts' in locals() and count_info_parts:
                                 db_context += "\n【注意：以下のデータはサンプルです】\n"
                                 db_context += "件数は上記の【データ件数情報】セクションに記載された数値を使用してください。\n"
                                 db_context += "以下のサンプルデータから件数を数えないでください。\n"
                             db_context += "【関連するデータ（サンプル）】\n"
-                            for data in similar_business_data:
+                            for data in use_similar_business_data:
                                 # 完全な内容を表示（切り詰めない）
                                 db_context += f"{data['content']}\n\n"
                 except Exception as e:
@@ -359,7 +458,7 @@ class ChatService:
                 context_parts.append(db_context)
             
             if context_parts:
-                message_with_data = f"{message}\n\n" + "\n".join(context_parts) + "\n\n**重要**: 上記のベクトルDBからの情報のみを使用して質問に答えてください。SQLクエリは一切生成しないでください。データベースへの直接アクセスは一切行わないでください。\n\n**注意**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリングやグループ化をしないでください。例えば「コンタクトの行動パターン」という質問では、全コンタクトを対象に分析し、担当者別に分割しないでください。"
+                message_with_data = f"{message}\n\n" + "\n".join(context_parts) + "\n\n**重要**: 上記のベクトルDBからの情報のみを使用して質問に答えてください。SQLクエリは一切生成しないでください。データベースへの直接アクセスは一切行わないでください。\n\n**絶対禁止**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリング、グループ化、集計、分割、分類を一切行わないでください。例えば「コンタクトの行動パターン」「コンタクトの分析」「コンタクトについて」という質問では、全コンタクトを対象に分析し、担当者別に分割・分類・集計しないでください。データに担当者情報が含まれていても、質問に担当者名が含まれていない限り、担当者でまとめたり分類したりしないでください。回答では「担当者別に」「○○さんが担当する」などの表現を使わないでください（質問に担当者名が含まれていない場合）。"
             else:
                 message_with_data = message_with_query
             
@@ -400,7 +499,7 @@ class ChatService:
             if context_parts:
                 if "【重要：データ件数情報】" in message_with_data or "【データ件数情報】" in message_with_data:
                     final_message += "\n\n**最重要**: メッセージに「【重要：データ件数情報】」または「【データ件数情報】」セクションが含まれている場合、必ずそのセクションに記載された件数をそのまま使用してください。他のデータセクション（【関連するデータ】など）から件数を数えたり推測したりしないでください。"
-                final_message += "\n\n**重要**: 必ず日本語のみで回答してください。英語や中国語は使用しないでください。SQLクエリは一切生成しないでください。\n\n**注意**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリングやグループ化をしないでください。例えば「コンタクトの行動パターン」という質問では、全コンタクトを対象に分析し、担当者別に分割しないでください。"
+                final_message += "\n\n**重要**: 必ず日本語のみで回答してください。英語や中国語は使用しないでください。SQLクエリは一切生成しないでください。\n\n**絶対禁止**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリング、グループ化、集計、分割、分類を一切行わないでください。例えば「コンタクトの行動パターン」「コンタクトの分析」「コンタクトについて」という質問では、全コンタクトを対象に分析し、担当者別に分割・分類・集計しないでください。データに担当者情報が含まれていても、質問に担当者名が含まれていない限り、担当者でまとめたり分類したりしないでください。回答では「担当者別に」「○○さんが担当する」などの表現を使わないでください（質問に担当者名が含まれていない場合）。"
             ollama_messages.append({
                 'role': 'user',
                 'content': final_message
@@ -677,48 +776,118 @@ SQLクエリは表示しないでください。分析結果のみを返して�
             # コンテキストを構築（send_messageと同じロジック）
             # 注意: 現在のメッセージのみを使用して検索し、過去の会話履歴の影響を排除
             db_context = ""
+            count_info_parts = []  # スコープ外でも参照できるように初期化
             if self.vector_store and should_search_vector_db:
                 try:
                     # 現在のメッセージのみを対象に判定（過去の会話履歴は除外）
                     current_message_only = message
-                    is_count_query = any(keyword in current_message_only for keyword in ['何件', 'いくつ', '数', '件数', 'カウント', '件ありますか'])
+                    is_count_query = any(keyword in current_message_only for keyword in ['何件', 'いくつ', '数', '件数', 'カウント', '件ありますか', '総件数', '合計'])
                     
-                    if is_count_query:
-                        owner_name_to_id = self._get_owner_name_to_id_cache()
+                    # コンタクト、取引、物件、会社、アクティビティに関する質問の場合は、総数を自動的に提供
+                    is_data_query = any(keyword in current_message_only.lower() for keyword in [
+                        'コンタクト', 'contact', '取引', 'deal', '仕入', '販売', '物件', 'property', '会社', 'company',
+                        'アクティビティ', 'activity', 'activities',
+                        '一覧', 'リスト', 'すべて', '全部', '総数', '合計'
+                    ])
+                    
+                    # 件数クエリまたはデータクエリの場合に総数を提供
+                    if is_count_query or is_data_query:
+                        # 質問に含まれるデータタイプを検出（現在のメッセージのみ）
+                        data_type_keywords = {
+                            'コンタクト': ('contact', 'コンタクト数', None),
+                            'contact': ('contact', 'コンタクト数', None),
+                            '仕入取引': ('deal_purchase', '仕入取引数', None),
+                            '仕入': ('deal_purchase', '仕入取引数', None),
+                            '販売取引': ('deal_sales', '販売取引数', None),
+                            '販売': ('deal_sales', '販売取引数', None),
+                            '物件': ('property', '物件数', None),
+                            '会社': ('company', '会社数', None),
+                            'アクティビティ': ('activity', 'アクティビティ数', None),
+                            'activity': ('activity', 'アクティビティ数', None),
+                            'activities': ('activity', 'アクティビティ数', None),
+                        }
+                        
+                        detected_types = []
+                        for keyword, (type_filter, label, text_filter) in data_type_keywords.items():
+                            if keyword in current_message_only.lower():
+                                detected_types.append((type_filter, label, text_filter))
+                        
+                        # データタイプが検出されない場合は、全データタイプの総数を提供
+                        if not detected_types and is_data_query:
+                            detected_types = [
+                                ('contact', 'コンタクト数', None),
+                                ('deal_purchase', '仕入取引数', None),
+                                ('deal_sales', '販売取引数', None),
+                                ('property', '物件数', None),
+                                ('company', '会社数', None),
+                                ('activity', 'アクティビティ数', None),
+                            ]
+                        
+                        # 質問に含まれる担当者名に基づいてカウント（現在のメッセージのみ）
                         count_info_parts = []
                         import re
+                        owner_name_to_id = self._get_owner_name_to_id_cache()
+                        
+                        # 担当者名が明示的に指定されている場合のみ、担当者別にカウント
+                        owner_specified = False
                         for name, owner_id_val in owner_name_to_id.items():
-                            # 担当者名を単語単位で検出（部分文字列マッチを避ける）
-                            # 現在のメッセージのみを対象に検出（過去の会話履歴は除外）
-                            # 例：「岩崎」は「岩崎さん」「岩崎が」などは検出するが、「行動パターン」の中の「岩崎」は検出しない
                             name_pattern = re.compile(rf'\b{re.escape(name)}\b|{re.escape(name)}さん|{re.escape(name)}が|{re.escape(name)}の|{re.escape(name)}は|{re.escape(name)}を|{re.escape(name)}に|{re.escape(name)}で')
                             if name_pattern.search(current_message_only):
-                                data_type_keywords = {
-                                    'コンタクト': ('contact', 'コンタクト数', None),
-                                    'contact': ('contact', 'コンタクト数', None),
-                                    '仕入取引': ('deal_purchase', '仕入取引数', None),
-                                    '仕入': ('deal_purchase', '仕入取引数', None),
-                                    '販売取引': ('deal_sales', '販売取引数', None),
-                                    '販売': ('deal_sales', '販売取引数', None),
-                                    '物件': ('property', '物件数', None),
-                                    '会社': ('company', '会社数', None),
-                                }
-                                
-                                detected_types = []
-                                for keyword, (type_filter, label, text_filter) in data_type_keywords.items():
-                                    # 現在のメッセージのみを対象に検出（過去の会話履歴は除外）
-                                    if keyword in current_message_only:
-                                        detected_types.append((type_filter, label, text_filter))
-                                
-                                if not detected_types:
-                                    detected_types = [('contact', 'コンタクト数', None)]
-                                
-                                for type_filter, label, text_filter in detected_types:
+                                owner_specified = True
+                                # 検出されたデータタイプ（または全タイプ）の件数をカウント
+                                types_to_count = detected_types if detected_types else [
+                                    ('contact', 'コンタクト数', None),
+                                    ('deal_purchase', '仕入取引数', None),
+                                    ('deal_sales', '販売取引数', None),
+                                    ('property', '物件数', None),
+                                    ('company', '会社数', None),
+                                    ('activity', 'アクティビティ数', None),
+                                ]
+                                for type_filter, label, text_filter in types_to_count:
                                     count = self.vector_store.count_business_data_by_metadata(
                                         type_filter=type_filter,
                                         owner_id=owner_id_val
                                     )
                                     count_info_parts.append(f"{name}さんが担当する{label}: {count:,}件")
+                        
+                        # 担当者名が指定されていない場合は、全体の総数をカウント
+                        if not owner_specified and detected_types:
+                            for type_filter, label, text_filter in detected_types:
+                                count = self.vector_store.count_business_data_by_metadata(
+                                    type_filter=type_filter,
+                                    owner_id=None
+                                )
+                                count_info_parts.append(f"{label}（全体）: {count:,}件")
+                                
+                                # アクティビティの内訳（電話、メール、メモ）を取得
+                                if type_filter == 'activity' and any(kw in current_message_only for kw in ['内訳', '電話', 'メール', 'メモ', 'CALL', 'EMAIL', 'NOTE']):
+                                    # 電話（CALL）
+                                    call_count = self.vector_store.count_business_data_by_metadata(
+                                        type_filter='activity',
+                                        owner_id=None,
+                                        activity_type='CALL'
+                                    )
+                                    count_info_parts.append(f"  - 電話: {call_count:,}件")
+                                    
+                                    # メール（EMAIL, INCOMING_EMAIL, FORWARDED_EMAIL）
+                                    email_types = ['EMAIL', 'INCOMING_EMAIL', 'FORWARDED_EMAIL']
+                                    email_total = 0
+                                    for email_type in email_types:
+                                        email_count = self.vector_store.count_business_data_by_metadata(
+                                            type_filter='activity',
+                                            owner_id=None,
+                                            activity_type=email_type
+                                        )
+                                        email_total += email_count
+                                    count_info_parts.append(f"  - メール: {email_total:,}件")
+                                    
+                                    # メモ（NOTE）
+                                    note_count = self.vector_store.count_business_data_by_metadata(
+                                        type_filter='activity',
+                                        owner_id=None,
+                                        activity_type='NOTE'
+                                    )
+                                    count_info_parts.append(f"  - メモ: {note_count:,}件")
                         
                         if count_info_parts:
                             db_context = "\n" + "=" * 80 + "\n"
@@ -729,7 +898,10 @@ SQLクエリは表示しないでください。分析結果のみを返して�
                             db_context += "\n".join(count_info_parts) + "\n"
                             db_context += "=" * 80 + "\n\n"
                     
-                    if similar_db_info or similar_business_data or db_context:
+                    # 件数クエリの場合は、件数情報が提供されているため、similar_business_dataは使用しない（limit=10の制限を回避）
+                    use_similar_business_data = similar_business_data and not is_count_query
+                    
+                    if similar_db_info or use_similar_business_data or db_context:
                         if not db_context:
                             db_context = "\n【関連するデータベース情報】\n"
                         
@@ -739,13 +911,19 @@ SQLクエリは表示しないでください。分析結果のみを返して�
                             for info in similar_db_info:
                                 db_context += f"{info['content'][:300]}...\n\n"
                         
-                        if similar_business_data:
+                        if use_similar_business_data:
+                            # 件数情報が提供されている場合は、サンプルデータであることを明記
+                            # 件数クエリの場合は、件数情報が正確に提供されているため、サンプルデータは含めない
+                            if 'count_info_parts' in locals() and count_info_parts:
+                                db_context += "\n【注意：以下のデータはサンプルです】\n"
+                                db_context += "件数は上記の【データ件数情報】セクションに記載された数値を使用してください。\n"
+                                db_context += "以下のサンプルデータから件数を数えないでください。\n"
                             db_context += "【関連するデータ（サンプル）】\n"
                             # デバッグ: 検索結果のowner_idをログに記録
-                            owner_ids_in_results = set(data.get('owner_id') for data in similar_business_data if data.get('owner_id'))
+                            owner_ids_in_results = set(data.get('owner_id') for data in use_similar_business_data if data.get('owner_id'))
                             if owner_ids_in_results:
                                 logger.info(f"ビジネスデータ検索結果に含まれるowner_id: {owner_ids_in_results}")
-                            for data in similar_business_data:
+                            for data in use_similar_business_data:
                                 db_context += f"{data['content']}\n\n"
                 except Exception as e:
                     logger.warning(f"データベース情報検索に失敗: {str(e)}")
@@ -758,7 +936,7 @@ SQLクエリは表示しないでください。分析結果のみを返して�
                 context_parts.append(db_context)
             
             if context_parts:
-                message_with_data = f"{message}\n\n" + "\n".join(context_parts) + "\n\n**重要**: 上記のベクトルDBからの情報のみを使用して質問に答えてください。SQLクエリは一切生成しないでください。データベースへの直接アクセスは一切行わないでください。\n\n**注意**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリングやグループ化をしないでください。例えば「コンタクトの行動パターン」という質問では、全コンタクトを対象に分析し、担当者別に分割しないでください。"
+                message_with_data = f"{message}\n\n" + "\n".join(context_parts) + "\n\n**重要**: 上記のベクトルDBからの情報のみを使用して質問に答えてください。SQLクエリは一切生成しないでください。データベースへの直接アクセスは一切行わないでください。\n\n**絶対禁止**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリング、グループ化、集計、分割、分類を一切行わないでください。例えば「コンタクトの行動パターン」「コンタクトの分析」「コンタクトについて」という質問では、全コンタクトを対象に分析し、担当者別に分割・分類・集計しないでください。データに担当者情報が含まれていても、質問に担当者名が含まれていない限り、担当者でまとめたり分類したりしないでください。回答では「担当者別に」「○○さんが担当する」などの表現を使わないでください（質問に担当者名が含まれていない場合）。"
             else:
                 message_with_data = message
             
@@ -796,7 +974,7 @@ SQLクエリは表示しないでください。分析結果のみを返して�
             if context_parts:
                 if "【重要：データ件数情報】" in message_with_data or "【データ件数情報】" in message_with_data:
                     final_message += "\n\n**最重要**: メッセージに「【重要：データ件数情報】」または「【データ件数情報】」セクションが含まれている場合、必ずそのセクションに記載された件数をそのまま使用してください。他のデータセクション（【関連するデータ】など）から件数を数えたり推測したりしないでください。"
-                final_message += "\n\n**重要**: 必ず日本語のみで回答してください。英語や中国語は使用しないでください。SQLクエリは一切生成しないでください。\n\n**注意**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリングやグループ化をしないでください。例えば「コンタクトの行動パターン」という質問では、全コンタクトを対象に分析し、担当者別に分割しないでください。"
+                final_message += "\n\n**重要**: 必ず日本語のみで回答してください。英語や中国語は使用しないでください。SQLクエリは一切生成しないでください。\n\n**絶対禁止**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリング、グループ化、集計、分割、分類を一切行わないでください。例えば「コンタクトの行動パターン」「コンタクトの分析」「コンタクトについて」という質問では、全コンタクトを対象に分析し、担当者別に分割・分類・集計しないでください。データに担当者情報が含まれていても、質問に担当者名が含まれていない限り、担当者でまとめたり分類したりしないでください。回答では「担当者別に」「○○さんが担当する」などの表現を使わないでください（質問に担当者名が含まれていない場合）。"
             
             ollama_messages.append({
                 'role': 'user',
@@ -1039,10 +1217,12 @@ SQLクエリは表示しないでください。分析結果のみを返して�
 - 仕入: コンタクト → 仕入取引 → 物件
 - 販売: 物件 → 販売取引 → コンタクト
 
-【重要な注意事項】
-- 担当者名が質問に明示的に含まれていない限り、担当者でフィルタリングやグループ化をしない
-- 「コンタクトの行動パターン」のような質問では、担当者別に分析しない（全コンタクトを対象に分析）
-- 担当者に関する質問（例：「○○さんの担当するコンタクト」）の場合は除く
+【重要な注意事項 - 担当者でのグループ化・フィルタリング禁止】
+- **絶対禁止**: 質問に担当者名が明示的に含まれていない限り、担当者でフィルタリング、グループ化、集計、分割、分類を一切行わない
+- 「コンタクトの行動パターン」「コンタクトの分析」「コンタクトについて」などの質問では、担当者別に分析・集計・分類しない（全コンタクトを対象に分析）
+- 担当者に関する質問（例：「○○さんの担当するコンタクト」「○○さんが担当する」）の場合のみ、担当者でフィルタリング可能
+- データに担当者情報が含まれていても、質問に担当者名が含まれていない限り、担当者でまとめたり分類したりしない
+- 回答では「担当者別に」「○○さんが担当する」などの表現を使わない（質問に担当者名が含まれていない場合）
 
 【契約に至った取引の判定】
 仕入・販売取引ともに、以下いずれかで「契約に至った」と判定：

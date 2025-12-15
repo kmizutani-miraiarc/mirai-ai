@@ -77,6 +77,7 @@ class VectorDataSync:
             await self.sync_properties()
             await self.sync_deals_purchase()
             await self.sync_deals_sales()
+            await self.sync_activities()
             
             logger.info("ベクトルDBへのデータ同期が完了しました")
         except Exception as e:
@@ -471,6 +472,71 @@ class VectorDataSync:
         except Exception as e:
             logger.error(f"販売取引データ同期エラー: {str(e)}", exc_info=True)
     
+    async def sync_activities(self):
+        """アクティビティデータを同期"""
+        logger.info("=" * 80)
+        logger.info("アクティビティデータの同期を開始します")
+        logger.info("=" * 80)
+        
+        try:
+            async with DatabaseConnection.get_cursor() as (cursor, conn):
+                await cursor.execute("""
+                    SELECT 
+                        a.id,
+                        a.hubspot_engagement_id,
+                        a.activity_type,
+                        a.owner_id,
+                        a.activity_timestamp,
+                        a.active,
+                        o.firstname as owner_firstname,
+                        o.lastname as owner_lastname,
+                        ad.subject,
+                        ad.body,
+                        a.updated_at
+                    FROM activities a
+                    LEFT JOIN owners o ON a.owner_id = o.id
+                    LEFT JOIN activity_details ad ON a.id = ad.activity_id
+                    WHERE a.active = 1
+                    ORDER BY a.id
+                """)
+                rows = await cursor.fetchall()
+                total = len(rows)
+                logger.info(f"MySQLから {total:,}件のアクティビティデータを取得しました")
+                
+                for i in range(0, len(rows), self.batch_size):
+                    batch = rows[i:i + self.batch_size]
+                    processed = min(i + self.batch_size, total)
+                    
+                    for row in batch:
+                        text = self._format_activity_text(row)
+                        
+                        doc_id = f"activity_{row['id']}"
+                        metadata = {
+                            "type": "activity",
+                            "id": row['id'],
+                            "hubspot_engagement_id": row.get('hubspot_engagement_id') or '',
+                            "activity_type": row.get('activity_type') or '',
+                            "owner_id": row.get('owner_id') or 0,
+                            "updated_at": row.get('updated_at', datetime.now()).isoformat() if row.get('updated_at') else datetime.now().isoformat()
+                        }
+                        metadata = self._sanitize_metadata(metadata)
+                        
+                        await self._add_to_vector_db(
+                            collection_name="business_data",
+                            doc_id=doc_id,
+                            text=text,
+                            metadata=metadata
+                        )
+                    
+                    percentage = (processed / total * 100) if total > 0 else 0
+                    logger.info(f"アクティビティデータ: {processed:,}/{total:,}件を処理しました ({percentage:.1f}%)")
+                
+                logger.info("=" * 80)
+                logger.info(f"✅ アクティビティデータ {total:,}件を同期しました")
+                logger.info("=" * 80)
+        except Exception as e:
+            logger.error(f"アクティビティデータ同期エラー: {str(e)}", exc_info=True)
+    
     async def _add_to_vector_db(
         self,
         collection_name: str,
@@ -664,6 +730,27 @@ class VectorDataSync:
             parts.append(f"決済日: {row['settlement_date'].strftime('%Y-%m-%d')}")
         if row.get('contract_date'):
             parts.append(f"契約日: {row['contract_date'].strftime('%Y-%m-%d')}")
+        return "\n".join(parts)
+    
+    def _format_activity_text(self, row: Dict) -> str:
+        """アクティビティデータをテキスト形式に変換"""
+        parts = ["アクティビティ情報"]
+        if row.get('activity_type'):
+            parts.append(f"アクティビティタイプ: {row['activity_type']}")
+        if row.get('owner_firstname') or row.get('owner_lastname'):
+            owner_name = f"{row.get('owner_firstname', '')} {row.get('owner_lastname', '')}".strip()
+            if owner_name:
+                parts.append(f"担当者: {owner_name}")
+        if row.get('activity_timestamp'):
+            parts.append(f"日時: {row['activity_timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
+        if row.get('subject'):
+            parts.append(f"件名: {row['subject']}")
+        if row.get('body'):
+            # bodyが長い場合は最初の500文字だけ
+            body = row['body']
+            if len(body) > 500:
+                body = body[:500] + "..."
+            parts.append(f"内容: {body}")
         return "\n".join(parts)
 
 

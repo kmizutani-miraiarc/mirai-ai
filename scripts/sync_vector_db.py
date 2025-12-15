@@ -27,7 +27,7 @@ async def main():
     
     parser = argparse.ArgumentParser(description='MySQLからベクトルDBへのデータ同期')
     parser.add_argument('--force', action='store_true', help='強制的に全データを同期')
-    parser.add_argument('--table', choices=['owners', 'companies', 'contacts', 'properties', 'deals_purchase', 'deals_sales', 'all'],
+    parser.add_argument('--table', choices=['owners', 'companies', 'contacts', 'properties', 'deals_purchase', 'deals_sales', 'activities', 'all'],
                        default='all', help='同期するテーブル（デフォルト: all）')
     
     args = parser.parse_args()
@@ -51,6 +51,8 @@ async def main():
             await sync.sync_deals_purchase()
         elif args.table == 'deals_sales':
             await sync.sync_deals_sales()
+        elif args.table == 'activities':
+            await sync.sync_activities()
         
         logger.info("ベクトルDB同期が完了しました")
     except Exception as e:
