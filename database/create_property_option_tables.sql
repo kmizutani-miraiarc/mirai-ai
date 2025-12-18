@@ -17,3 +17,4 @@ CREATE TABLE IF NOT EXISTS property_option_values (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='プロパティ選択値マスタテーブル';
 
 
+

@@ -40,3 +40,4 @@ INSERT INTO pipelines (hubspot_id, pipeline_type, label, display_order) VALUES
 ON DUPLICATE KEY UPDATE label=VALUES(label);
 
 
+

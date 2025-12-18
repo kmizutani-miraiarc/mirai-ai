@@ -178,3 +178,4 @@ vm_stat  # macOS
 - [qwen2.5モデルの詳細](https://ollama.ai/library/qwen2.5)
 - [メモリ要件の詳細](https://github.com/ollama/ollama/blob/main/docs/modelfile.md)
 
+

@@ -91,3 +91,4 @@ async def create_admin_tables():
         logger.error(f"管理画面用テーブルの作成に失敗: {str(e)}")
         raise
 
+

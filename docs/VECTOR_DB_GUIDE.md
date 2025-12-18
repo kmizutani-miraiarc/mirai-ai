@@ -154,3 +154,4 @@ docker exec mirai-ollama ollama pull nomic-embed-text
 - より高度なRAG（Retrieval-Augmented Generation）の実装
 - 複数セッション間での知識共有
 
+

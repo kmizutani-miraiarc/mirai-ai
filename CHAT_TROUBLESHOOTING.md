@@ -191,3 +191,4 @@ except Exception as e:
 4. `docker ps`の出力
 5. `docker exec mirai-ollama ollama list`の出力
 
+

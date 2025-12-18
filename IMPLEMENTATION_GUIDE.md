@@ -159,3 +159,4 @@ sudo systemctl start mirai-ai-sync.timer
 3. 埋め込み生成とベクトル検索（オプション）
 
 
+

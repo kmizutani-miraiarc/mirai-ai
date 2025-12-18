@@ -134,3 +134,4 @@ async def check_vector_db():
 if __name__ == "__main__":
     asyncio.run(check_vector_db())
 
+

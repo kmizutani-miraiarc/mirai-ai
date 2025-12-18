@@ -36,3 +36,4 @@ echo "- データベース情報検索"
 echo ""
 echo "詳細は docs/VECTOR_DB_GUIDE.md を参照してください"
 
+

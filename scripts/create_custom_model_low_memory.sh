@@ -100,3 +100,4 @@ echo ""
 echo "Pythonコード:"
 echo "  client.generate(model='mirai-qwen', prompt='質問')"
 
+

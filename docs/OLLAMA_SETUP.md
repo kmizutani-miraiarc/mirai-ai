@@ -182,3 +182,4 @@ docker exec -it mirai-ollama ollama pull llama2:7b
 4. ⬜ Pythonコードでの統合
 5. ⬜ パフォーマンステスト
 
+
