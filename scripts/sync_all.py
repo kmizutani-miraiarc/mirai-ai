@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.sync.owners_sync import OwnersSync
 from src.sync.companies_sync import CompaniesSync
 from src.sync.contacts_sync import ContactsSync
+from src.sync.pipeline_stages_sync import PipelineStagesSync
 from src.sync.deals_purchase_sync import DealsPurchaseSync
 from src.sync.deals_sales_sync import DealsSalesSync
 from src.sync.properties_sync import PropertiesSync
@@ -51,22 +52,27 @@ async def main():
         contacts_sync = ContactsSync()
         await contacts_sync.sync()
 
-        # 4. Deals Purchase同期
+        # 4. Pipeline Stages同期（Deals同期の前に必要）
+        logger.info("\n=== Pipeline Stages同期 ===")
+        pipeline_stages_sync = PipelineStagesSync()
+        await pipeline_stages_sync.sync()
+
+        # 5. Deals Purchase同期
         logger.info("\n=== Deals Purchase同期 ===")
         deals_purchase_sync = DealsPurchaseSync()
         await deals_purchase_sync.sync()
 
-        # 5. Deals Sales同期
+        # 6. Deals Sales同期
         logger.info("\n=== Deals Sales同期 ===")
         deals_sales_sync = DealsSalesSync()
         await deals_sales_sync.sync()
 
-        # 6. Properties同期
+        # 7. Properties同期
         logger.info("\n=== Properties同期 ===")
         properties_sync = PropertiesSync()
         await properties_sync.sync()
 
-        # 7. Activities同期
+        # 8. Activities同期
         logger.info("\n=== Activities同期 ===")
         activities_sync = ActivitiesSync()
         await activities_sync.sync()

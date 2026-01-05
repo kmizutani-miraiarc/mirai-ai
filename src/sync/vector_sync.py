@@ -344,6 +344,7 @@ class VectorDataSync:
                         dp.hubspot_owner_id,
                         o.firstname as owner_firstname,
                         o.lastname as owner_lastname,
+                        ps.label as stage_name,
                         dp.created_at,
                         dp.updated_at,
                         -- コンタクト情報
@@ -359,13 +360,14 @@ class VectorDataSync:
                         GROUP_CONCAT(DISTINCT p.total_floor_area SEPARATOR ', ') as property_floor_areas
                     FROM deals_purchase dp
                     LEFT JOIN owners o ON dp.hubspot_owner_id = o.id
+                    LEFT JOIN pipeline_stages ps ON dp.dealstage = ps.id
                     LEFT JOIN deal_purchase_contact_associations dpca ON dp.id = dpca.deal_id
                     LEFT JOIN contacts c ON dpca.contact_id = c.id
                     LEFT JOIN deal_purchase_property_associations dppa ON dp.id = dppa.deal_id
                     LEFT JOIN properties p ON dppa.property_id = p.id
                     GROUP BY dp.id, dp.hubspot_id, dp.dealname, dp.research_purchase_price,
                              dp.settlement_date, dp.contract_date, dp.bukken_created,
-                             dp.hubspot_owner_id, o.firstname, o.lastname, dp.created_at, dp.updated_at
+                             dp.hubspot_owner_id, o.firstname, o.lastname, ps.label, dp.created_at, dp.updated_at
                     ORDER BY dp.id
                 """)
                 rows = await cursor.fetchall()
@@ -428,10 +430,12 @@ class VectorDataSync:
                         ds.hubspot_owner_id,
                         o.firstname as owner_firstname,
                         o.lastname as owner_lastname,
+                        ps.label as stage_name,
                         ds.created_at,
                         ds.updated_at
                     FROM deals_sales ds
                     LEFT JOIN owners o ON ds.hubspot_owner_id = o.id
+                    LEFT JOIN pipeline_stages ps ON ds.dealstage = ps.id
                     ORDER BY ds.id
                 """)
                 rows = await cursor.fetchall()
@@ -676,6 +680,8 @@ class VectorDataSync:
         parts = ["仕入取引情報"]
         if row.get('dealname'):
             parts.append(f"取引名: {row['dealname']}")
+        if row.get('stage_name'):
+            parts.append(f"ステージ: {row['stage_name']}")
         if row.get('research_purchase_price'):
             parts.append(f"仕入価格: {row['research_purchase_price']}円")
         if row.get('owner_firstname') or row.get('owner_lastname'):
@@ -716,6 +722,8 @@ class VectorDataSync:
         parts = ["販売取引情報"]
         if row.get('dealname'):
             parts.append(f"取引名: {row['dealname']}")
+        if row.get('stage_name'):
+            parts.append(f"ステージ: {row['stage_name']}")
         if row.get('sales_sales_price'):
             parts.append(f"販売価格: {row['sales_sales_price']}円")
         if row.get('final_closing_price'):
